@@ -10,10 +10,11 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     length = size(training_plan);
     height = user_traits(1);
     mass = user_traits(2);
-    c_rr = user_traits(3); %https://en.wikipedia.org/wiki/Rolling_resistance, typically about 0.03
-    c_d = user_traits(4); %https://en.wikipedia.org/wiki/Drag_coefficient, typically about 1.0
-    fitness = 0;
-    
+    %https://en.wikipedia.org/wiki/Rolling_resistance, typically about 0.03
+    c_rr = user_traits(3);
+    %https://en.wikipedia.org/wiki/Drag_coefficient, typically about 1.0
+    c_d = user_traits(4);
+
     fitness = 0;
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
@@ -45,10 +46,21 @@ function fitness = objective(training_plan, user_fitness, user_traits)
 
     %https://strava.zendesk.com/entries/20959332-Power-Calculations
     function lvl = L(x)
+        p = P(x);
+        
+        if p < 2.5 || t <= 0
+            lvl = 0;
+        else
+            lvl_sc = p*t^(1/3);
+            lvl = 10*(lvl_sc - 2.5) + 1;
+        end
+    end
+
+    function p = P(x)
         d = x(1);
         t = x(2);
         e = x(3);
-        v = (d/1000)/(t/60);
+        v = (d*1000)/(t*60);
         grade = sin(e/d/2);
         %https://en.wikipedia.org/wiki/Normal_force
         N = acos(grade) / (mass * 9.8);
@@ -60,14 +72,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         a = (height * mass / 3600)^0.5; 
         %http://en.wikipedia.org/wiki/Drag_(physics)
         p_wind = 0.5 * ro * v^3 * c_d * a; 
-        p_g = mass * 9.8 * sin(atan(grade)) * v;
-        p = p_rr + p_wind + p_g;
-        
-        if p < 2.5 || t <= 0
-            lvl = 0;
-        else
-            lvl_sc = p*t^(1/3);
-            lvl = 10*(lvl_sc - 2.5) + 1;
-        end
+        %p_g = mass * 9.8 * sin(atan(grade)) * v;
+        p = p_rr + p_wind;% + p_g;
     end
 end
