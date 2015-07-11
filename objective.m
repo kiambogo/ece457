@@ -13,6 +13,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     c_rr = user_traits(3); %https://en.wikipedia.org/wiki/Rolling_resistance
     c_d = user_traits(4); %https://en.wikipedia.org/wiki/Drag_coefficient
     
+    fitness = 0;
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
     end
