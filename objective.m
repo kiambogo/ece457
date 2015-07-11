@@ -10,8 +10,9 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     length = size(training_plan);
     height = user_traits(1);
     mass = user_traits(2);
-    c_rr = user_traits(3); %https://en.wikipedia.org/wiki/Rolling_resistance
-    c_d = user_traits(4); %https://en.wikipedia.org/wiki/Drag_coefficient
+    c_rr = user_traits(3); %https://en.wikipedia.org/wiki/Rolling_resistance, typically about 0.03
+    c_d = user_traits(4); %https://en.wikipedia.org/wiki/Drag_coefficient, typically about 1.0
+    fitness = 0;
     
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
@@ -36,7 +37,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     function q = Q(X, user_fitness)
         total_levels = 0;
         for j=1:size(X)
-           total_levels = total_levels + L(x) - user_fitness;
+           total_levels = total_levels + L(X) - user_fitness;
         end
         q = heaviside(-1000 * total_levels);
     end
@@ -49,7 +50,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         v = (d/1000)/(t/60);
         grade = sin(e/d/2);
         %https://en.wikipedia.org/wiki/Normal_force
-        N = arccos(grade) / (mass * 9.8);
+        N = acos(grade) / (mass * 9.8);
         %http://en.wikipedia.org/wiki/Rolling_resistance
         p_rr = c_rr * N * v; 
         %https://en.wikipedia.org/wiki/Density_of_air
@@ -58,7 +59,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         a = (height * mass / 3600)^0.5; 
         %http://en.wikipedia.org/wiki/Drag_(physics)
         p_wind = 0.5 * ro * v^3 * c_d * a; 
-        p_g = mass * 9.8 * sin(arctan(grade)) * v;
+        p_g = mass * 9.8 * sin(atan(grade)) * v;
         p = p_rr + p_wind + p_g;
         
         if p < 2.5 || t <= 0
