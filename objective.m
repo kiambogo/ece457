@@ -61,21 +61,23 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         t = x(2);
         e = x(3);
         v = (d*1000)/(t*60);
-        theta = asin(e/(d*1000/2));
+        theta = asin(e/(d*1000/3));
         %https://en.wikipedia.org/wiki/Normal_force
-        N = cos(theta) * mass * 9.8;
+        N_hill = cos(theta) * mass * 9.8;
+        N_flat = mass * 9.8;
         %http://en.wikipedia.org/wiki/Rolling_resistance
-        p_rr = c_rr * N * v; 
+        p_rr_hill = c_rr * N_hill * v;
+        p_rr_flat = c_rr * N_flat * v;
         %https://en.wikipedia.org/wiki/Density_of_air
         ro = 1.255;
-        %http://www.medcalc.com/body.html
-        a = (height * mass / 3600)^0.5; 
+        %assuming frontal surface area
+        a = 0.5;
         %http://en.wikipedia.org/wiki/Drag_(physics)
-        p_wind = 0.5 * ro * v^3 * c_d * a; 
+        p_wind = 0.5 * ro * v^3 * c_d * a;
         p_g = mass * 9.8 * sin(theta) * v;
-        p_up = p_rr + p_wind + p_g;
-        s = (9.8 * mass * sin(theta) / (c_d * a))^0.5;
-        p_down = 0.5 * ro * s^3 * c_d * a;
-        p = (p_up + p_down)/2;
+        p_up = p_rr_hill + p_wind + p_g;
+        p_flat = p_rr_flat + p_wind;
+        p_down = p_rr_hill + p_wind - p_g;
+        p = (p_up + p_flat + p_down)/3;
     end
 end
