@@ -44,18 +44,12 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         q = heaviside(-1000 * total_levels);
     end
 
-    %https://strava.zendesk.com/entries/20959332-Power-Calculations
     function lvl = L(x)
         p = P(x);
-        
-        if p < 2.5 || t <= 0
-            lvl = 0;
-        else
-            lvl_sc = p*t^(1/3);
-            lvl = 10*(lvl_sc - 2.5) + 1;
-        end
+        lvl = heaviside(-200/x(2) + p/5 - 9);
     end
 
+    %https://strava.zendesk.com/entries/20959332-Power-Calculations
     function p = P(x)
         d = x(1);
         t = x(2);
