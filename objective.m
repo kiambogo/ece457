@@ -40,8 +40,15 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     function q = Q(X, user_fitness)
         total_levels = 0;
         for j=1:size(X)
-            l = L(X(j,:));
-           total_levels = total_levels + l - user_fitness
+           l = L(X(j,:));
+           if l > (user_fitness + 1)
+               lvl_penalty = l - (user_fitness + 1);
+           elseif l < (user_fitness - 4)
+               lvl_penalty = (user_fitness - 4) - l;
+           else
+               lvl_penalty = 0;
+           end
+           total_levels = total_levels + lvl_penalty;
         end
         q = heaviside(1000 * total_levels);
     end
