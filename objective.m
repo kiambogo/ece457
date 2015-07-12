@@ -7,11 +7,10 @@
 function fitness = objective(training_plan, user_fitness, user_traits)
     global length height mass c_rr;
     
-    %length = size(training_plan);
-    length = 14;
+    length = 14; %length of the training plan in days
     height = user_traits(1);
     mass = user_traits(2);
-    %https://en.wikipedia.org/wiki/Rolling_resistance, typically about 0.03
+    %https://en.wikipedia.org/wiki/Rolling_resistance, typically about 0.004
     c_rr = user_traits(3);
     %https://en.wikipedia.org/wiki/Drag_coefficient, typically about 1.0
     c_d = user_traits(4);
@@ -20,15 +19,14 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
     end
-    h = H(training_plan)
-    q = Q(training_plan, user_fitness)
-    fitness = fitness - h - q;
+    fitness = fitness - H(training_plan) - Q(training_plan, user_fitness);
 
     function y = heaviside(X)
         %heaviside step function
-        y = zeros(size(X));
-        y(X > 0) = 1 * X;
-        y(X == 0) = .5 * X;
+        he = zeros(size(X));
+        he(X > 0) = 1;
+        he(X == 0) = .5;
+        y = he .* X;
     end
 
     function h = H(X)
