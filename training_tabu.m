@@ -2,7 +2,7 @@
 % Performs an optimization on activities that constitute a training plan in an attempt to create the best training plan. 
 
 % Takes a parameter of user_fitness_data which has the following format
-% [Umax_distance Umax_climb fitness_level]
+% [Umax_distance Umax_climb user_fitness]
 % and user_traits which has the following format
 % [height mass c_rr c_d]
 
