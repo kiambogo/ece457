@@ -4,7 +4,7 @@
 
 % Returns the fitness of a training plan
 
-function fitness = objective(training_plan, user_fitness, user_traits)
+function fitness = output(training_plan, user_fitness, user_traits)
     global length height mass c_rr;
     
     length = 14; %length of the training plan in days
@@ -19,7 +19,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
     end
-    fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan);
+    fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan)
 
     function y = heaviside(X)
         %heaviside step function
@@ -34,7 +34,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         for j=1:size(X)
             recovery_time = recovery_time + (2.75 * X(j,2) / 100);
         end
-        h = 100 * heaviside(recovery_time - length);
+        h = 100 * heaviside(recovery_time - length)
     end
 
     function q = Q(X, user_fitness)
@@ -50,7 +50,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
            end
            total_levels = total_levels + lvl_penalty;
         end
-        q = heaviside(1000 * total_levels);
+        q = heaviside(1000 * total_levels)
     end
 
     function lvl = L(x)
@@ -92,7 +92,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         elseif (long_p <= 0.15)
             penalty = penalty + (0.15 - long_p)*40000;
         end
-        v = penalty;
+        v = penalty
     end
 
     %https://strava.zendesk.com/entries/20959332-Power-Calculations

@@ -19,7 +19,7 @@ search_space = ...
 bestTP = init(search_space)
 neighbours = generateNeighbours(bestTP);
 tabuList = zeros(8,3,100);
-for i = 1:1000
+for i = 1:2000
     for n = 1:50 
         neighbour = neighbours(:,:,n);
         % If the neighbour is a better training plan, select it
@@ -38,6 +38,7 @@ for i = 1:1000
     end
     a = bestTP;
 end
+    output(a, user_fitness_data(3), user_traits);
 end
 %%
 function initTrainingPlan = init(ss)
@@ -66,8 +67,3 @@ function neighbours = generateNeighbours(trainingPlan)
         end
     end
 end
-
-function bestPlan = findBestTrainingPlan(initialPlan, neighbours)
-
-end
-
