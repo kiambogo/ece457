@@ -32,7 +32,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     function h = H(X)
         recovery_time = 0;
         for j=1:size(X)
-            recovery_time = recovery_time + (2.75 * X(j,2) / 100);
+            recovery_time = recovery_time + (2.75 * X(j,2) / 200);
         end
         h = 100 * heaviside(recovery_time - length);
     end
