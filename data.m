@@ -4,7 +4,7 @@
 
 % Returns the fitness of a training plan
 
-function fitness = objective(training_plan, user_fitness, user_traits)
+function fitness = output(training_plan, user_fitness, user_traits)
     global length height mass c_rr;
     
     length = 14; %length of the training plan in days
@@ -19,7 +19,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     for i=1:size(training_plan)
         fitness = fitness + (2.75 * training_plan(i,2));
     end
-    fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan);
+    fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan)
 
     function y = heaviside(X)
         %heaviside step function
@@ -32,7 +32,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     function h = H(X)
         recovery_time = 0;
         for j=1:size(X)
-            recovery_time = recovery_time + (2.75 * X(j,2) / 200);
+            recovery_time = recovery_time + (2.75 * X(j,2) / 100);
         end
         h = 100 * heaviside(recovery_time - length)
     end
@@ -55,7 +55,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
 
     function lvl = L(x)
         p = P(x);
-        lvl = heaviside(-200/x(2) + p/5 - 9);
+        lvl = heaviside(-200/x(2) + p/5 - 9)
     end
 
     function v = V(training_plan)
@@ -66,31 +66,31 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         for j = 1:8
             activity = training_plan(j,:);
             duration = activity(2);
-            if duration >= 30 && duration < 60
+            if duration >= 30 && duration <= 60
                 short = short + 1;
             elseif duration >= 60 && duration <= 120
                 average = average + 1;
-            elseif duration > 120
+            elseif duration >= 120
                 long = long + 1;
             end
         end
         short_p = short/8;
         if (short_p >= 0.35)
-            penalty = penalty + (short_p - 0.35)*40000;
+            penalty = penalty + (short_p - 0.35)*10000;
         elseif (short_p <= 0.15)
-            penalty = penalty + (0.15 - short_p)*40000;
+            penalty = penalty + (0.15 - short_p)*10000;
         end
         avg_p = average/8;
         if (avg_p >= 0.6)
-            penalty = penalty + (avg_p - 0.6)*40000;
+            penalty = penalty + (avg_p - 0.6)*10000;
         elseif (avg_p <= 0.4)
-            penalty = penalty + (0.4 - avg_p)*40000;
+            penalty = penalty + (0.4 - avg_p)*10000;
         end
         long_p = long/8;
         if (long_p >= 0.37)
-            penalty = penalty + (long_p - 0.35)*40000;
+            penalty = penalty + (long_p - 0.35)*10000;
         elseif (long_p <= 0.15)
-            penalty = penalty + (0.15 - long_p)*40000;
+            penalty = penalty + (0.15 - long_p)*10000;
         end
         v = penalty
     end
@@ -118,6 +118,6 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         p_up = p_rr_hill + p_wind + p_g;
         p_flat = p_rr_flat + p_wind;
         p_down = p_rr_hill + p_wind - p_g;
-        p = (p_up + p_flat + p_down)/3;
+        p = (p_up + p_flat + p_down)/3
     end
 end

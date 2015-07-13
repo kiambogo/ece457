@@ -16,10 +16,12 @@ search_space = ...
     [5 user_fitness_data(1)*1.25;...
     20 user_fitness_data(1)*1.25*(60/40);...
     0 user_fitness_data(2)*1.25];
-bestTP = init(search_space)
+%bestTP = init(search_space)
+%bestTP = [21 45 50; 22 45 75; 28 60 100; 29 60 125; 56 120 150; 57 120 175; 84 180 200; 85 180 225];
+bestTP = G(user_fitness_data(3))
 neighbours = generateNeighbours(bestTP);
 tabuList = zeros(8,3,100);
-for i = 1:2000
+for i = 1:5000
     for n = 1:50 
         neighbour = neighbours(:,:,n);
         % If the neighbour is a better training plan, select it
