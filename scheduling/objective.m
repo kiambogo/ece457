@@ -4,7 +4,7 @@
 
 % Returns the fitness of a scheduled training plan
 
-function fitness = objective(training_plan, calendar)
+function fitness = scheduling_objective(training_plan, calendar)
     global U_pre U_post
     
     % Pre exercise window is 10 min
