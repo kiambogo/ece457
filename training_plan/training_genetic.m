@@ -7,7 +7,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
     global pop popnew popsel fitness fitold range user_fitness n;
     
     % Initializing the parameters
-    rng(0);     % Reset the random generator
+    rng('shuffle');     % Reset the random generator
     popsize=20; % Population size
     MaxGen=100; % Max number of generations
     count=0;    % counter
