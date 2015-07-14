@@ -54,10 +54,18 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
         % Function evaluations at new locations
         ns = best;
         for j = 1:8
-            ns(j,:)=[ ...
-                ns(j,1)+randn(1)*sqrt(1), ...
-                ns(j,2)+randn(1)*sqrt(4), ...
-                ns(j,2)+randn(1)*sqrt(10)];
+            valid = false;
+            while (~valid)
+                ns(j,:)=[ ...
+                    ns(j,1)+randn(1)*sqrt(1), ...
+                    ns(j,2)+randn(1)*sqrt(4), ...
+                    ns(j,2)+randn(1)*sqrt(10)];
+                if (ns(j,1) >= search_space(1,1) && ns(j,1) <= search_space(1,2) && ...
+                    ns(j,2) >= search_space(2,1) && ns(j,2) <= search_space(2,2) && ...
+                    ns(j,3) >= search_space(3,1) && ns(j,3) <= search_space(3,2))
+                    valid = true;
+                end
+            end
         end
         E_new = obj(ns, user_fitness, user_traits);
 
@@ -82,13 +90,5 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
         obj_opt=E_old;
     end
     
-    function initTrainingPlan = init(ss)
-        initTrainingPlan = zeros(8,3);
-        for n = 1:8
-            initTrainingPlan(n,:) = [...
-                (ss(1,2)-ss(1,1))*rand(1, 1)+ss(1,1),...
-                (ss(2,2)-ss(2,1))*rand(1, 1)+ss(2,1),...
-                (ss(3,2)-ss(3,1))*rand(1, 1)+ss(3,1)];
-        end
-    end
+    output(best, user_fitness, user_traits);
 end

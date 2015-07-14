@@ -9,7 +9,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
     % Initializing the parameters
     rng(0);     % Reset the random generator
     popsize=20; % Population size
-    MaxGen=1000; % Max number of generations
+    MaxGen=100; % Max number of generations
     count=0;    % counter
     pc=0.95;    % Crossover probability
     pm=0.05;    % Mutation probability

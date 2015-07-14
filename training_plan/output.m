@@ -17,10 +17,22 @@ function fitness = objective(training_plan, user_fitness, user_traits)
 
     fitness = 0;
     for i=1:size(training_plan)
-        fitness = fitness + (2.75 * training_plan(i,2));
+        fitness = fitness + (W(training_plan(i,:)));
     end
+    fitness
     fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan);
+    fitness = heaviside(fitness)
 
+    function w = W(x)
+        if (x(2) >= 30 && x(2) < 60)
+            w=120+randn(1)*15;
+        elseif (x(2) >= 60 && x(2) <= 120)
+            w=250+randn(1)*30;
+        else
+            w=2.75*x(2);
+        end
+    end
+    
     function y = heaviside(X)
         %heaviside step function
         he = zeros(size(X));
@@ -32,7 +44,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
     function h = H(X)
         recovery_time = 0;
         for j=1:size(X)
-            recovery_time = recovery_time + (2.75 * X(j,2) / 200);
+            recovery_time = recovery_time + (W(X(j,:)) / 200);
         end
         h = 100 * heaviside(recovery_time - length)
     end
@@ -50,7 +62,10 @@ function fitness = objective(training_plan, user_fitness, user_traits)
            end
            total_levels = total_levels + lvl_penalty;
         end
-        q = heaviside(1000 * total_levels)
+        if total_levels > 10
+            total_levels = 10;
+        end
+        q = heaviside(50 * total_levels)
     end
 
     function lvl = L(x)
@@ -63,7 +78,8 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         average = 0;
         long = 0;
         penalty = 0;
-        for j = 1:8
+        row = size(training_plan, 1);
+        for j = 1:row
             activity = training_plan(j,:);
             duration = activity(2);
             if duration >= 30 && duration < 60
@@ -74,23 +90,23 @@ function fitness = objective(training_plan, user_fitness, user_traits)
                 long = long + 1;
             end
         end
-        short_p = short/8;
+        short_p = short/row;
         if (short_p >= 0.35)
-            penalty = penalty + (short_p - 0.35)*40000;
+            penalty = penalty + (short_p - 0.35)*3000;
         elseif (short_p <= 0.15)
-            penalty = penalty + (0.15 - short_p)*40000;
+            penalty = penalty + (0.15 - short_p)*3000;
         end
-        avg_p = average/8;
+        avg_p = average/row;
         if (avg_p >= 0.6)
-            penalty = penalty + (avg_p - 0.6)*40000;
+            penalty = penalty + (avg_p - 0.6)*3000;
         elseif (avg_p <= 0.4)
-            penalty = penalty + (0.4 - avg_p)*40000;
+            penalty = penalty + (0.4 - avg_p)*3000;
         end
-        long_p = long/8;
+        long_p = long/row;
         if (long_p >= 0.37)
-            penalty = penalty + (long_p - 0.35)*40000;
+            penalty = penalty + (long_p - 0.35)*3000;
         elseif (long_p <= 0.15)
-            penalty = penalty + (0.15 - long_p)*40000;
+            penalty = penalty + (0.15 - long_p)*3000;
         end
         v = penalty
     end
