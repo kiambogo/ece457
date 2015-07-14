@@ -25,7 +25,7 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1e-8; % Energy norm (eg, Enorm=le-8)
-    guess=init(search_space); % Initial guess
+    guess=G(user_fitness); % Initial guess
     
     % Initializing the counters i,j etc
     i= 0; j = 0; accept = 0; totaleval = 0;
