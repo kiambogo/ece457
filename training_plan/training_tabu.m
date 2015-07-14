@@ -6,7 +6,7 @@
 % and user_traits which has the following format
 % [height mass c_rr c_d]
 
-function a = training_tabu(user_fitness_data, user_traits)
+function a = training_tabu(user_fitness_data, user_traits, obj)
     % Search space has the following format:
         % [Distance_min Distance_max]
         % [Time_min Time_max]
@@ -25,8 +25,8 @@ function a = training_tabu(user_fitness_data, user_traits)
             neighbour = neighbours(:,:,n);
             % If the neighbour is a better training plan, select it
             % This is determined by maximizing the fitness function
-            neighbour_fitness = objective(neighbour, user_fitness_data(3), user_traits);
-            current_best_fitness = objective(bestTP, user_fitness_data(3), user_traits);
+            neighbour_fitness = obj(neighbour, user_fitness_data(3), user_traits);
+            current_best_fitness = obj(bestTP, user_fitness_data(3), user_traits);
 
             if (neighbour_fitness >= current_best_fitness)
                 % If the selected TP is not in the Tabu list, then choose it
