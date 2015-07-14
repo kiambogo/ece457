@@ -20,6 +20,7 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         fitness = fitness + (W(training_plan(i,:)));
     end
     fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan);
+    fitness = heaviside(fitness);
 
     function w = W(x)
         if (x(2) >= 30 && x(2) < 60)
@@ -60,7 +61,10 @@ function fitness = objective(training_plan, user_fitness, user_traits)
            end
            total_levels = total_levels + lvl_penalty;
         end
-        q = heaviside(1000 * total_levels);
+        if total_levels > 10
+            total_levels = 10;
+        end
+        q = heaviside(50 * total_levels);
     end
 
     function lvl = L(x)
@@ -87,21 +91,21 @@ function fitness = objective(training_plan, user_fitness, user_traits)
         end
         short_p = short/row;
         if (short_p >= 0.35)
-            penalty = penalty + (short_p - 0.35)*40000;
+            penalty = penalty + (short_p - 0.35)*3000;
         elseif (short_p <= 0.15)
-            penalty = penalty + (0.15 - short_p)*40000;
+            penalty = penalty + (0.15 - short_p)*3000;
         end
         avg_p = average/row;
         if (avg_p >= 0.6)
-            penalty = penalty + (avg_p - 0.6)*40000;
+            penalty = penalty + (avg_p - 0.6)*3000;
         elseif (avg_p <= 0.4)
-            penalty = penalty + (0.4 - avg_p)*40000;
+            penalty = penalty + (0.4 - avg_p)*3000;
         end
         long_p = long/row;
         if (long_p >= 0.37)
-            penalty = penalty + (long_p - 0.35)*40000;
+            penalty = penalty + (long_p - 0.35)*3000;
         elseif (long_p <= 0.15)
-            penalty = penalty + (0.15 - long_p)*40000;
+            penalty = penalty + (0.15 - long_p)*3000;
         end
         v = penalty;
     end

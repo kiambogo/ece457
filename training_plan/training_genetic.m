@@ -71,7 +71,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
         % number of offspring to keep
         N = popsize;
         for f=1:size(popsel, 1)
-           F = F + 1.0e+8 + obj(reshape(popsel(f,:),n,3), user_fitness, user_traits);
+           F = F + obj(reshape(popsel(f,:),n,3), user_fitness, user_traits);
         end
         % distance between the pointers
         P = F/N;
@@ -86,7 +86,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
         sum_fit = 0;
         for p=1:N
             while (sum_fit < pointers(p) && o < size(popsel,1))
-               sum_fit = sum_fit + 1.0e+8 + obj(reshape(popsel(o,:),n,3), user_fitness, user_traits);
+               sum_fit = sum_fit + obj(reshape(popsel(o,:),n,3), user_fitness, user_traits);
                o = o + 1;
             end
             keep(p,:) = popsel(o,:);
