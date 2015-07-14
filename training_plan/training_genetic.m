@@ -7,7 +7,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
     global pop popnew popsel fitness fitold range user_fitness n;
     
     % Initializing the parameters
-    rng(0);     % Reset the random generator
+    rng('shuffle');     % Reset the random generator
     popsize=20; % Population size
     MaxGen=100; % Max number of generations
     count=0;    % counter
@@ -21,7 +21,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
     user_fitness = user_fitness_data(3);
     
     % Generating the initial population
-    popnew=init_gen(range);
+    popnew=init_gen();
     fitness=zeros(1,popsize); % fitness array
     
     % Start the evolution loop
@@ -55,7 +55,7 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
         bestplan(i,:)=pop(best_index(1),:);
     end
 
-    function pop=init_gen(ss)
+    function pop=init_gen()
         pop = zeros(popsize, n*3);
         for p=1:popsize
             plan = G(user_fitness);

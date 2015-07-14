@@ -1,20 +1,6 @@
-% The Simulated Annealing implementation of the training plan generator. 
-% Performs an optimization on activities that constitute a training plan in an attempt to create the best training plan. 
-
-% Takes a parameter of user_fitness_data which has the following format
-% [Umax_distance Umax_climb user_fitness]
-% and user_traits which has the following format
-% [height mass c_rr c_d]
-
-% Takes a function obj which is the objective function
-
-function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user_traits, obj)
+function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
-    search_space = ...
-        [5 user_fitness_data(1)*1.25;...
-        20 user_fitness_data(1)*1.25*(60/40);...
-        0 user_fitness_data(2)*1.25];
-    user_fitness=user_fitness_data(3);
+    search_space = [0 1344];
 
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
@@ -25,14 +11,14 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1e-8; % Energy norm (eg, Enorm=le-8)
-    guess=G(user_fitness); % Initial guess
+    guess=sched_init(training_plan); % Initial guess
     
     % Initializing the counters i,j etc
     i= 0; j = 0; accept = 0; totaleval = 0;
 
     % Initializing various values
     T = T_init;
-    E_init = obj(guess, user_fitness, user_traits);
+    E_init = obj(guess, calendar);
     E_old = E_init; E_new=E_old;
     best=guess; % initially guessed values
 
@@ -57,17 +43,15 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
             valid = false;
             while (~valid)
                 ns(j,:)=[ ...
-                    ns(j,1)+randn(1)*sqrt(1), ...
-                    ns(j,2)+randn(1)*sqrt(4), ...
-                    ns(j,3)+randn(1)*sqrt(10)];
-                if (ns(j,1) >= search_space(1,1) && ns(j,1) <= search_space(1,2) && ...
-                    ns(j,2) >= search_space(2,1) && ns(j,2) <= search_space(2,2) && ...
-                    ns(j,3) >= search_space(3,1) && ns(j,3) <= search_space(3,2))
+                    ns(j,1), ...
+                    ns(j,2), ...
+                    ns(j,3)+randn(1)*sqrt(1)];
+                if (ns(j,3) >= search_space(1,1) && ns(j,3) <= search_space(1,2))
                     valid = true;
                 end
             end
         end
-        E_new = obj(ns, user_fitness, user_traits);
+        E_new = obj(ns, calendar);
 
         % Decide to accept the new solution
         DeltaE=E_new-E_old;
@@ -89,6 +73,4 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
         % Update the estimated optimal solution
         obj_opt=E_old;
     end
-    
-    output(best, user_fitness, user_traits);
 end
