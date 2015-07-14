@@ -1,23 +1,18 @@
-% The Tabu search implementation of the training plan generator. 
-% Performs an optimization on activities that constitute a training plan in an attempt to create the best training plan. 
+% The Tabu search implementation for scheduling a training plan. 
+% Performs an optimization on schedules of activities in an attempt to find
+% an optimal schedule for the training plan
 
 % Takes a parameter of user_fitness_data which has the following format
 % [Umax_distance Umax_climb user_fitness]
 % and user_traits which has the following format
 % [height mass c_rr c_d]
 
-function a = scheduling_tabu(user_fitness_data, user_traits)
+function a = scheduling_tabu(training_plan, calendar)
     % Search space has the following format:
-        % [Distance_min Distance_max]
         % [Time_min Time_max]
-        % [Elevation_min Elevation_max]
-    search_space = ...
-        [5 user_fitness_data(1)*1.25;...
-        20 user_fitness_data(1)*1.25*(60/40);...
-        0 user_fitness_data(2)*1.25];
-    %bestTP = init(search_space)
-    %bestTP = [21 45 50; 22 45 75; 28 60 100; 29 60 125; 56 120 150; 57 120 175; 84 180 200; 85 180 225];
-    bestTP = G(user_fitness_data(3));
+    search_space = [0 1344];
+    
+    bestSchedule = G(user_fitness_data(3));
     neighbours = generateNeighbours(bestTP, search_space);
     tabuList = zeros(8,3,100);
     for i = 1:1000
