@@ -1,17 +1,17 @@
 function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
-    search_space = [0 1344];
+    search_space = [1+1 1344-2];
 
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
-    obj_max = 1e+100; % Min value of the function
+    obj_min = -1e+100; % Min value of the function
     max_rej=2500; % Maximum number of rejectionsgi
     max_run=500; % Maximum number of runs
     max_accept = 15; % Maximum number of accept
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1e-8; % Energy norm (eg, Enorm=le-8)
-    guess=sched_init(training_plan); % Initial guess
+    guess=sched_init(training_plan, search_space); % Initial guess
     
     % Initializing the counters i,j etc
     i= 0; j = 0; accept = 0; totaleval = 0;
@@ -23,7 +23,7 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
     best=guess; % initially guessed values
 
     % Starting the simulated annealling
-    while ((T > T_min) && (j <= max_rej) && E_new<obj_max)
+    while ((T > T_min) && (j <= max_rej) && E_new>obj_min)
         i = i+1;
 
         % Check if max numbers of run/accept are met
@@ -45,7 +45,7 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
                 ns(j,:)=[ ...
                     ns(j,1), ...
                     ns(j,2), ...
-                    ns(j,3)+randn(1)*sqrt(1)];
+                    ns(j,3)+ceil(randn(1)*sqrt(3))];
                 if (ns(j,3) >= search_space(1,1) && ns(j,3) <= search_space(1,2))
                     valid = true;
                 end
@@ -57,12 +57,12 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
         DeltaE=E_new-E_old;
 
         % Accept if improved
-        if (DeltaE > Enorm)
+        if (-DeltaE > Enorm)
             best = ns; E_old = E_new;
             accept=accept+1; j = 0;
         else
             % Accept with a small probability if not improved
-            if (exp(DeltaE/(k*T))>rand)
+            if (exp(-DeltaE/(k*T))>rand)
                 best = ns; E_old = E_new;
                 accept=accept+1;
             else

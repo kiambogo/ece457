@@ -10,10 +10,10 @@
 % Returns the fitness of a scheduled training plan
 
 function fitness = scheduling_objective(scheduled_training_plan, calendar)
-    global U_PRE U_POST cal_size;
+    global U_PRE U_POST CAL_SIZE;
     
     % Calendar size is 1344 15min segments
-    CAL_SIZE = 1344;
+    CAL_SIZE = length(calendar);
     % Pre exercise window is 1 15min window
     U_PRE = 1;
     % Post exercise window is 2 15min windows
@@ -26,19 +26,24 @@ function fitness = scheduling_objective(scheduled_training_plan, calendar)
         busy_pre_size = 0;
         busy_during_size = 0;
         busy_post_size = 0;
-        for j = start-U_PRE:start
-            busy_pre_size = busy_pre_size + calendar(j);
-        end
-        for j = start:finish
-            busy_during_size = busy_during_size + calendar(j);
-        end
-        for j = finish:finish+U_POST
-            busy_post_size = busy_post_size + calendar(j);
-        end
-        total_size = busy_pre_size + busy_during_size + busy_post_size;
-        if total_size == 0
-            o = [0 0 0];
-        else o = [busy_pre_size/total_size busy_during_size/total_size busy_post_size/total_size];
+        if (finish+U_POST > CAL_SIZE || start-U_PRE < 0)
+            o = [1000 1000 1000];
+        else
+            for j = start-U_PRE:start
+                busy_pre_size = busy_pre_size + calendar(j);
+            end
+            for j = start:finish
+                busy_during_size = busy_during_size + calendar(j);
+            end
+            for j = finish:finish+U_POST
+                busy_post_size = busy_post_size + calendar(j);
+            end
+            total_size = busy_pre_size + busy_during_size + busy_post_size;
+            if total_size == 0
+                o = [0 0 0];
+            else
+                o = [busy_pre_size/total_size busy_during_size/total_size busy_post_size/total_size];
+            end
         end
     end
 
@@ -87,7 +92,7 @@ function fitness = scheduling_objective(scheduled_training_plan, calendar)
     end
 
     fitness = 0;
-    g = G(scheduled_training_plan, calendar)
-    h = H(scheduled_training_plan)
+    g = G(scheduled_training_plan, calendar);
+    h = H(scheduled_training_plan);
     fitness = g + h;
 end
