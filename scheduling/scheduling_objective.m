@@ -29,7 +29,10 @@ function fitness = scheduling_objective(scheduled_training_plan, calendar)
         if (finish+U_POST > CAL_SIZE || start-U_PRE < 0)
             o = [1000 1000 1000];
         else
-            for j = start-U_PRE:start
+            if (start-U_PRE <= 0) s = 1;
+            else s = start-U_PRE;
+            end
+            for j = s:start
                 busy_pre_size = busy_pre_size + calendar(j);
             end
             for j = start:finish
@@ -92,7 +95,8 @@ function fitness = scheduling_objective(scheduled_training_plan, calendar)
     end
 
     fitness = 0;
-    g = G(scheduled_training_plan, calendar);
-    h = H(scheduled_training_plan);
-    fitness = g + h;
+    sortedPlan = sortrows(scheduled_training_plan, 3);
+%     g = G(scheduled_training_plan, calendar);
+     h = H(sortedPlan);
+    fitness = h;
 end

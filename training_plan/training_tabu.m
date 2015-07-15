@@ -7,6 +7,9 @@
 % [height mass c_rr c_d]
 
 function a = training_tabu(user_fitness_data, user_traits, obj)
+    global iter;
+    
+    iter = 1000;
     % Search space has the following format:
         % [Distance_min Distance_max]
         % [Time_min Time_max]
@@ -19,8 +22,8 @@ function a = training_tabu(user_fitness_data, user_traits, obj)
     %bestTP = [21 45 50; 22 45 75; 28 60 100; 29 60 125; 56 120 150; 57 120 175; 84 180 200; 85 180 225];
     bestTP = G(user_fitness_data(3));
     neighbours = generateNeighbours(bestTP, search_space);
-    tabuList = zeros(8,3,100);
-    for i = 1:1000
+    tabuList = zeros(8,3,iter);
+    for i = 1:iter
         for n = 1:50 
             neighbour = neighbours(:,:,n);
             % If the neighbour is a better training plan, select it
