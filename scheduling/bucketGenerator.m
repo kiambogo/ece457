@@ -1,5 +1,4 @@
 function buckets = bucketGenerator(calendar)
-        buckets = [];
         startTimes = [];
         endTimes = [];
         % 6:00 - 21:00 daily
@@ -12,7 +11,7 @@ function buckets = bucketGenerator(calendar)
             startTimes = [startTimes 1];
         end
         while (j < 1342)
-            while (r == r2 & j < 1342)
+            while (r == r2 && j < 1342)
                 j = j + 1;
                 r = calendar(j);
                 r2 = calendar(j+1); 
@@ -25,5 +24,6 @@ function buckets = bucketGenerator(calendar)
             r = calendar(j+1);
             r2 = calendar(j+2); 
         end
-        buckets = [transpose(startTimes) transpose(endTimes)];
+        buckets = [transpose(startTimes) transpose(endTimes) transpose(endTimes-startTimes+1)];
+        buckets = sortrows(buckets, -3);
     end

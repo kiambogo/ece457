@@ -9,7 +9,7 @@
 
 % Returns the fitness of a scheduled training plan
 
-function fitness = scheduling_objective(scheduled_training_plan, calendar)
+function fitness = scheduling_objective(scheduled_training_plan, calendar, buckets)
     global U_PRE U_POST CAL_SIZE;
     
     % Calendar size is 1344 15min segments
@@ -96,6 +96,9 @@ function fitness = scheduling_objective(scheduled_training_plan, calendar)
 
     fitness = 0;
     sortedPlan = sortrows(scheduled_training_plan, 3);
+    for p = 1:size(sortedPlan,1)
+        sortedPlan(p,3) = buckets(sortedPlan(p,3),1);
+    end
 %     g = G(scheduled_training_plan, calendar);
      h = H(sortedPlan);
     fitness = h;

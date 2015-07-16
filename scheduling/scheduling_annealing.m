@@ -1,6 +1,7 @@
 function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
     search_space = [1+1 1344-2];
+    buckets = bucketGenerator(calendar);
 
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
@@ -11,14 +12,14 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1e-8; % Energy norm (eg, Enorm=le-8)
-    guess=sched_init(training_plan, search_space); % Initial guess
+    guess=sched_init(training_plan, buckets); % Initial guess
     
     % Initializing the counters i,j etc
     i= 0; j = 0; accept = 0; totaleval = 0;
 
     % Initializing various values
     T = T_init;
-    E_init = obj(guess, calendar);
+    E_init = obj(guess, calendar, buckets);
     E_old = E_init; E_new=E_old;
     best=guess; % initially guessed values
 
@@ -42,16 +43,24 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
         for j = 1:8
             valid = false;
             while (~valid)
+                validList = ones(8,1);
                 ns(j,:)=[ ...
                     ns(j,1), ...
                     ns(j,2), ...
-                    ns(j,3)+ceil(randn(1)*sqrt(3))];
-                if (ns(j,3) >= search_space(1,1) && ns(j,3) <= search_space(1,2))
+                    randi(min([find(buckets(:,3)<ns(j,2), 1)-1 size(buckets,1)]))];
+                for k=1:8
+                    if (size(find(ns(k,3)==ns(:,3)),1) ~= 1)
+                        validList(k)=0;
+                    end
+                end
+                if (validList == 1)
                     valid = true;
+                else
+                    valid = false;
                 end
             end
         end
-        E_new = obj(ns, calendar);
+        E_new = obj(ns, calendar, buckets);
 
         % Decide to accept the new solution
         DeltaE=E_new-E_old;
