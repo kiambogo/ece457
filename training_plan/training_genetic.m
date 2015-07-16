@@ -2,26 +2,29 @@
 % [Umax_distance Umax_climb user_fitness]
 % and user_traits which has the following format
 % [height mass c_rr c_d]
+% and user_prefs which has the following format
+% [num_acts pct_short pct_avg pct_long]
 
-function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_traits, obj)
+function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_traits, user_prefs, obj)
     global pop popnew popsel fitness fitold range user_fitness n;
     
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator
-    popsize=20; % Population size
-    MaxGen=100; % Max number of generations
-    count=0;    % counter
-    pc=0.95;    % Crossover probability
-    pm=0.05;    % Mutation probability
-    n=8;        % Number of activities
+    popsize=20;         % Population size
+    MaxGen=100;         % Max number of generations
+    count=0;            % counter
+    pc=0.95;            % Crossover probability
+    pm=0.05;            % Mutation probability
+    n=user_prefs(1);    % Number of activities
     
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
             0 user_fitness_data(2)*1.25];
     user_fitness = user_fitness_data(3);
+    macro_varience = [floor(n*user_prefs(2)) ceil(n*user_prefs(3)) floor(n*user_prefs(4))];
     
     % Generating the initial population
-    popnew=init_gen();
+    popnew=init_gen(macro_varience);
     fitness=zeros(1,popsize); % fitness array
     
     % Start the evolution loop
@@ -55,10 +58,10 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
         bestplan(i,:)=pop(best_index(1),:);
     end
 
-    function pop=init_gen()
+    function pop=init_gen(macro_varience)
         pop = zeros(popsize, n*3);
         for p=1:popsize
-            plan = G(user_fitness);
+            plan = G(user_fitness, macro_varience);
             pop(p,:) = reshape(plan,1,n*3);
         end
     end
