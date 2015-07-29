@@ -17,11 +17,10 @@ function [a, score] = scheduling_tabu(training_plan, calendar)
     
     buckets = bucketGenerator(calendar);
     bestSched = sched_init(training_plan, buckets);
-    init_score = scheduling_objective(bestSched, calendar, buckets)
+    init_score = scheduling_objective(bestSched, calendar, buckets);
     neighbours = generateNeighbours(bestSched, bucketGenerator(calendar));
     tabuList = zeros(8,3,iter);
     for i = 1:iter
-        i
         for n = 1:50 
             neighbour = neighbours(:,:,n);
             % If the neighbour is a better training plan, select it
@@ -46,7 +45,7 @@ function [a, score] = scheduling_tabu(training_plan, calendar)
     for p = 1:size(a,1)
         b(p,3) = buckets(a(p,3),1);
     end
-    display_sched(b, calendar)
+%    display_sched(b, calendar)
 end
 
 function neighbours = generateNeighbours(scheduled_tp, buckets)
@@ -74,4 +73,3 @@ function neighbours = generateNeighbours(scheduled_tp, buckets)
         end
     end
 end
-
