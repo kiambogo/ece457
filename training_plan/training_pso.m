@@ -11,7 +11,7 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
-function training_pso(user_fitness_data, user_traits, user_prefs, obj)
+function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, obj)
     %Initialization  
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
@@ -23,7 +23,7 @@ function training_pso(user_fitness_data, user_traits, user_prefs, obj)
     
     popsize = 10;   % Size of the swarm
     npar = n*3;     % Dimension of the problem
-    maxit = 100;      % Maximum number of iterations
+    maxit = 1000;   % Maximum number of iterations
     c1 = 1;         % cognitive parameter
     c2 = 4-c1;      % social parameter
     C = 1;          % constriction factor
@@ -33,7 +33,6 @@ function training_pso(user_fitness_data, user_traits, user_prefs, obj)
     for i = 1:popsize
        par = [par; reshape(G(user_fitness, macro_varience),1,npar)];
     end
-    par
     vel = rand(popsize,npar); % random velocities
     score = [];
     for i = 1:popsize
@@ -96,9 +95,10 @@ function training_pso(user_fitness_data, user_traits, user_prefs, obj)
             globalscore = temp;
         end
         % print output each iteration
-        iter 
-        reshape(globalpar,n,3) 
-        globalscore
+        %iter
+        %score
+        %reshape(globalpar,n,3)
+        %globalscore
         maxc(iter+1) = max(score); % min for this iteration
         globalmax(iter+1) = globalscore; % best max so far
         meanc(iter+1) = mean(score); % avg. cost for this iteration
