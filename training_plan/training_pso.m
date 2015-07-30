@@ -64,20 +64,20 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
         distance_par = par(:,1:n);
         distance_overlimit = distance_par<=range(1,2);
         distance_underlimit = distance_par>=range(1,1);
-        distance_par = distance_par.*distance_overlimit + not(distance_overlimit);
-        distance_par = distance_par.*distance_underlimit;
+        distance_par = distance_par.*distance_overlimit + not(distance_overlimit)*range(1,2);
+        distance_par = distance_par.*distance_underlimit + not(distance_underlimit)*range(1,1);
         
         time_par = par(:,1+n:n*2);
         time_overlimit = time_par<=range(2,2);
         time_underlimit = time_par>=range(2,1);
-        time_par = time_par.*time_overlimit + not(time_overlimit);
-        time_par = time_par.*time_underlimit;
+        time_par = time_par.*time_overlimit + not(time_overlimit)*range(2,2);
+        time_par = time_par.*time_underlimit + not(time_overlimit)*range(2,1);
         
         elevation_par = par(:,1+2*n:n*3);
         elevation_overlimit = elevation_par<=range(3,2);
         elevation_underlimit = elevation_par>=range(3,1);
-        elevation_par = elevation_par.*elevation_overlimit + not(elevation_overlimit);
-        elevation_par = elevation_par.*elevation_underlimit;
+        elevation_par = elevation_par.*elevation_overlimit + not(elevation_overlimit)*range(3,2);
+        elevation_par = elevation_par.*elevation_underlimit + not(elevation_overlimit)*range(3,1);
         
         par = [distance_par time_par elevation_par];
         % Evaluate the new swarm
