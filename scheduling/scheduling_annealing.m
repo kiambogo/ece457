@@ -1,8 +1,6 @@
 function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
-    search_space = [1+1 1344-2];
     buckets = bucketGenerator(calendar);
-
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
     obj_min = -1e+100; % Min value of the function
@@ -19,14 +17,12 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
 
     % Initializing various values
     T = T_init;
-    E_init = obj(guess, calendar, buckets);
+    E_init = obj(guess, buckets);
     E_old = E_init; E_new=E_old;
     best=guess; % initially guessed values
 
     % Starting the simulated annealling
-    while ((T > T_min) && (j <= max_rej) && E_new>obj_min)
-        i = i+1;
-
+    while ((T > T_min) && (j <= max_rej) && E_new>obj_min && totaleval+i<10000)
         % Check if max numbers of run/accept are met
         if (i >= max_run) || (accept >= max_accept)
 
@@ -35,8 +31,9 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
             totaleval = totaleval + i;
 
             % reset the counters
-            i = 1; accept = 1;
+            i = 0; accept = 0;
         end
+        i = i+1;
 
         % Function evaluations at new locations
         ns = best;
@@ -60,7 +57,7 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
                 end
             end
         end
-        E_new = obj(ns, calendar, buckets);
+        E_new = obj(ns, buckets);
 
         % Decide to accept the new solution
         DeltaE=E_new-E_old;

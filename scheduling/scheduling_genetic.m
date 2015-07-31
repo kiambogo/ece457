@@ -4,14 +4,14 @@
 % [height mass c_rr c_d]
 
 function [bestplan, bestfun, count] = scheduling_genetic(training_plan, calendar, obj)
-    global pop popnew popsel fitness fitold range user_fitness n nsbit;
+    global pop popnew popsel fitness fitold range buckets n nsbit;
     
-    range = [1+1 1344-2];
-    
+    buckets = bucketGenerator(calendar);
+    range = [1 size(buckets,1)];
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator
     popsize=20; % Population size
-    MaxGen=1000; % Max number of generations
+    MaxGen=100; % Max number of generations
     count=0;    % counter
     pc=0.95;    % Crossover probability
     pm=0.05;    % Mutation probability
@@ -57,7 +57,7 @@ function [bestplan, bestfun, count] = scheduling_genetic(training_plan, calendar
     function pop=init_gen()
         pop = zeros(popsize, n*(2+nsbit));
         for p=1:popsize
-            sched = sched_init(training_plan, range);
+            sched = sched_init(training_plan, buckets);
             pop(p,:) = reshape(transpose(schedtobin(sched)),1,n*(2+nsbit));
         end
     end
@@ -104,7 +104,7 @@ function [bestplan, bestfun, count] = scheduling_genetic(training_plan, calendar
         % number of offspring to keep
         N = popsize;
         for f=1:size(popsel, 1)
-            F = F + 1/(1 + obj(bintosched(reshape(popsel(f,:),n,2+nsbit)), calendar));
+            F = F + 1/(1 + obj(bintosched(transpose(reshape(popsel(f,:),2+nsbit,n))), buckets));
         end
         % distance between the pointers
         P = F/N;
@@ -119,11 +119,11 @@ function [bestplan, bestfun, count] = scheduling_genetic(training_plan, calendar
         sum_fit = 0;
         for p=1:N
             while (sum_fit < pointers(p) && o < size(popsel,1))
-               sum_fit = sum_fit + 1/(1 + obj(bintosched(reshape(popsel(o,:),n,2+nsbit)), calendar));
+               sum_fit = sum_fit + 1/(1 + obj(bintosched(transpose(reshape(popsel(o,:),2+nsbit,n))), buckets));
                o = o + 1;
             end
             keep(p,:) = popsel(o,:);
-            keep_fit(p) = 1/(1 + obj(bintosched(reshape(popsel(o,:),n,2+nsbit)), calendar));
+            keep_fit(p) = 1/(1 + obj(bintosched(transpose(reshape(popsel(o,:),2+nsbit,n))), buckets));
         end
         popnew = keep;
         fitness = keep_fit;
@@ -131,31 +131,51 @@ function [bestplan, bestfun, count] = scheduling_genetic(training_plan, calendar
 
     % Crossover operator
     function [pair]=crossover(a,b)
-        c = a;
-        d = b;
-        for l=0:n-1
-            crossover = rand(1, nsbit) > 0.5;
-            for k=1:nsbit
-                if (crossover(k) == 1)
-                    m = k + 2 + (l*(2+nsbit));
-                    temp = c(m);
-                    c(m) = d(m);
-                    d(m) = temp;
+        valid = false;
+        while (~valid)
+            c = a;
+            d = b;
+            for l=0:n-1
+                crossover = rand(1, nsbit) > 0.5;
+                for k=1:nsbit
+                    if (crossover(k) == 1)
+                        m = k + 2 + (l*(2+nsbit));
+                        temp = c(m);
+                        c(m) = d(m);
+                        d(m) = temp;
+                    end
                 end
             end
+            pair = [c;d];
+            
+            sched_c = bintosched(transpose(reshape(c,2+nsbit,n)));
+            sched_d = bintosched(transpose(reshape(d,2+nsbit,n)));
+            if (max(sched_c(:,3)) <= range(2) && max(sched_c(:,3)) <= range(2) &&...
+                    min(sched_c(:,3)) >= range(1) && min(sched_c(:,3)) >= range(1) &&...
+                    max(sched_d(:,3)) <= range(2) && max(sched_d(:,3)) <= range(2) &&...
+                    min(sched_d(:,3)) >= range(1) && min(sched_d(:,3)) >= range(1))
+                valid = true;
+            end
         end
-        pair = [c;d];
     end
 
     % Mutation operator
     function sched=mutate(sched)
-        for l=0:n-1
-            bitflip = rand(1, nsbit) > 0.5;
-            for k=1:nsbit
-                if (bitflip(k) == 1)
-                    m = k + 2 + (l*(2+nsbit));
-                    sched(m) = ~sched(m);
+        valid = false;
+        while (~valid)
+            for l=0:n-1
+                bitflip = rand(1, nsbit) > 0.5;
+                for k=1:nsbit
+                    if (bitflip(k) == 1)
+                        m = k + 2 + (l*(2+nsbit));
+                        sched(m) = ~sched(m);
+                    end
                 end
+            end
+            sched_sched = bintosched(transpose(reshape(sched,2+nsbit,n)));
+            if (max(sched_sched(:,3)) <= range(2) && max(sched_sched(:,3)) <= range(2) &&...
+                    min(sched_sched(:,3)) >= range(1) && min(sched_sched(:,3)) >= range(1))
+                valid = true;
             end
         end
     end

@@ -41,8 +41,6 @@ function [best, obj_opt, best_obj, totaleval] = training_annealing(user_fitness_
 
     % Starting the simulated annealling
     while ((T > T_min) && (j <= max_rej) && E_new<obj_max && totaleval+i<10000)
-        
-
         % Check if max numbers of run/accept are met
         if (i >= max_run) || (accept >= max_accept)
             totaleval = totaleval + i;

@@ -103,7 +103,7 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
         meanc(iter+1) = mean(score); % avg. cost for this iteration
         
         %Check termination criteria
-        if (iter > 400)
+        if (iter > 200)
             last_100 = max(globalmax(iter-200:iter-101));
             curr_100 = max(globalmax(iter-100:iter));
             pct_inc = (curr_100 - last_100)/last_100 * 100;
