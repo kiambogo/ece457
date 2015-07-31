@@ -102,6 +102,17 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
         maxc(iter+1) = max(score); % min for this iteration
         globalmax(iter+1) = globalscore; % best max so far
         meanc(iter+1) = mean(score); % avg. cost for this iteration
+        
+        %Check termination criteria
+        if (iter > 400)
+            last_100 = max(globalmax(iter-200:iter-101));
+            curr_100 = max(globalmax(iter-100:iter));
+            pct_inc = (curr_100 - last_100)/last_100 * 100;
+            if (pct_inc < 0.1)
+                iter
+                break;
+            end
+        end
     end
     figure(24)
     iters = 0:length(maxc)-1;

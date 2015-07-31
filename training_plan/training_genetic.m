@@ -6,16 +6,19 @@
 % [num_acts pct_short pct_avg pct_long]
 
 function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_traits, user_prefs, obj)
-    global pop popnew popsel fitness fitold range user_fitness n;
+    global pop popnew popsel fitness fitold user_fitness n sigma;
     
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator
     popsize=20;         % Population size
-    MaxGen=100;         % Max number of generations
+    MaxGen=1000;         % Max number of generations
     count=0;            % counter
     pc=0.95;            % Crossover probability
     pm=0.05;            % Mutation probability
     n=user_prefs(1);    % Number of activities
+    sigma=1;            % Mutation standard deviation
+    mut_suc=0;          % Successful mutations
+    mut_tot=0;          % Total mutations
     
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
@@ -44,18 +47,50 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
 
             % Mutation
             if pm>rand 
-                popsel=[popsel; mutate(range)];
+                kk=floor(popsize*rand)+1;
+                mut=mutate(pop(kk,:),range);
+                popsel=[popsel; mut];
                 count=count+1;
+                mut_tot=mut_tot+1;
+                fit_org=obj(reshape(pop(kk,:),n,3), user_fitness, user_traits);
+                fit_mut=obj(reshape(mut,n,3), user_fitness, user_traits);
+                % Successful mutation
+                if (fit_mut > fit_org)
+                   mut_suc=mut_suc+1; 
+                end
             end
         end
         
         popsel = [popsel; pop];
         evolve();
+        
+        % Adapt sigma every 5th generation
+        if (mod(i,5) == 0)
+            if (mut_tot == 0)
+               sigma = 1;
+            else
+                if (mut_suc/mut_tot > 1/5)
+                   sigma = sigma/0.9; 
+                elseif (mut_suc/mut_tot < 1/5)
+                   sigma = sigma*0.9;
+                end
+            end
+        end
 
         % Record the current best
         bestfun(i)=max(fitness);
         best_index = find(fitness==bestfun(i));
         bestplan(i,:)=pop(best_index(1),:);
+        
+        %Check termination criteria
+        if (i > 200)
+            last_100 = max(bestfun(i-200:i-101));
+            curr_100 = max(bestfun(i-100:i));
+            pct_inc = (curr_100 - last_100)/last_100 * 100;
+            if (pct_inc < 0.1)
+                break;
+            end
+        end
     end
 
     function pop=init_gen(macro_varience)
@@ -107,13 +142,21 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
         pair = [c;d];
     end
 
-    function plan=mutate(ss)
-        plan = zeros(n,3);
+    function plan=mutate(c,ss)
+        plan = reshape(c,n,3);
         for a=1:n
-            plan(a,:) = [...
-                (ss(1,2)-ss(1,1))*rand(1, 1)+ss(1,1),...
-                (ss(2,2)-ss(2,1))*rand(1, 1)+ss(2,1),...
-                (ss(3,2)-ss(3,1))*rand(1, 1)+ss(3,1)];
+            valid = false;
+            while(~valid)
+                plan(a,:) = [...
+                    plan(a,1) + randn*sigma,...
+                    plan(a,2) + randn*2*sigma,...
+                    plan(a,3) + randn*4*sigma];
+                if (plan(a,1) <= ss(1,2) && plan(a,1) >= ss(1,1) &&...
+                        plan(a,2) <= ss(2,2) && plan(a,2) >= ss(2,1) &&...
+                        plan(a,3) <= ss(3,2) && plan(a,3) >= ss(3,1))
+                    valid = true;
+                end
+            end
         end
         plan = reshape(plan,1,n*3);
     end
