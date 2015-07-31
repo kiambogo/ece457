@@ -24,9 +24,9 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
     popsize = 10;   % Size of the swarm
     npar = n*3;     % Dimension of the problem
     maxit = 1000;   % Maximum number of iterations
-    c1 = 1;         % cognitive parameter
-    c2 = 4-c1;      % social parameter
-    C = 1;          % constriction factor
+    c1 = 1.4944;    % cognitive parameter
+    c2 = 1.4944;    % social parameter
+    w = 0.792;      % inertia
     
     % random population of training plans
     par = [];
@@ -54,10 +54,9 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
     while iter < maxit
         iter = iter + 1;
         % update velocity = vel
-        w = (maxit-iter)/maxit; %inertia weiindxht
         r1 = rand(popsize,npar); % random numbers
         r2 = rand(popsize,npar); % random numbers
-        vel = C*(w*vel + c1 *r1.*(localpar-par) + c2*r2.*(ones(popsize,1)*globalpar-par));
+        vel = (w*vel + c1 *r1.*(localpar-par) + c2*r2.*(ones(popsize,1)*globalpar-par));
         % update particle positions
         par = par + vel;
         
