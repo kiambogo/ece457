@@ -79,4 +79,6 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
         % Update the estimated optimal solution
         obj_opt=E_old;
     end
+    
+    totaleval = totaleval + i;
 end

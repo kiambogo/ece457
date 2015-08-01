@@ -7,7 +7,7 @@
 % and user_traits which has the following format
 % [height mass c_rr c_d]
 
-function [a, score] = scheduling_tabu(training_plan, calendar)
+function [a, score, i] = scheduling_tabu(training_plan, calendar, obj)
     iter = 1000;
     
     % Search space has the following format:
@@ -17,17 +17,16 @@ function [a, score] = scheduling_tabu(training_plan, calendar)
     
     buckets = bucketGenerator(calendar);
     bestSched = sched_init(training_plan, buckets);
-    init_score = scheduling_objective(bestSched, calendar, buckets)
+    init_score = obj(bestSched, buckets);
     neighbours = generateNeighbours(bestSched, bucketGenerator(calendar));
     tabuList = zeros(8,3,iter);
     for i = 1:iter
-        i
         for n = 1:50 
             neighbour = neighbours(:,:,n);
             % If the neighbour is a better training plan, select it
             % This is determined by maximizing the fitness function
-            neighbour_fitness = scheduling_objective(neighbour, calendar, buckets);
-            current_best_fitness = scheduling_objective(bestSched, calendar, buckets);
+            neighbour_fitness = obj(neighbour, buckets);
+            current_best_fitness = obj(bestSched, buckets);
 
             if (neighbour_fitness <= current_best_fitness)
                 % If the selected schedule is not in the Tabu list, then choose it
@@ -40,13 +39,8 @@ function [a, score] = scheduling_tabu(training_plan, calendar)
         neighbours = generateNeighbours(bestSched, bucketGenerator(calendar));
         a = bestSched;
     end
-%   output(a, user_fitness_data(3), user_traits);
-    score = scheduling_objective(a, calendar, buckets);
-    b = a;
-    for p = 1:size(a,1)
-        b(p,3) = buckets(a(p,3),1);
-    end
-    display_sched(b, calendar)
+    
+    score = obj(a, buckets);
 end
 
 function neighbours = generateNeighbours(scheduled_tp, buckets)
