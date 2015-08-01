@@ -10,7 +10,8 @@
 function scheduling_pso(training_plan, calendar, obj)
     %Initialization
     search_space = [0 1344];
-    range = [1+1 1344-2];
+    buckets = bucketGenerator(calendar);
+    range = [1 size(buckets,1)];
     n = size(training_plan, 1);
     nsbit=floor(log2(range(2))+1);
     % Initializing variables
@@ -20,17 +21,15 @@ function scheduling_pso(training_plan, calendar, obj)
     c1 = 1; % cognitive parameter
     c2 = 4-c1; % social parameter
     C=1; % constriction factor
-    buckets = bucketGenerator(calendar);
     % Initializing swarm and velocities
     par = [];
     for i = 1:popsize
       par = [par; reshape(sched_init(training_plan, buckets),1,npar)];
     end
-    par
-    vel = rand(popsize,n); % random velocities
+    vel = rand(n,nsbit,popsize); % random velocities for each bit
     score = [];
     for i = 1:popsize
-       score = [score; obj(reshape(par(i,:),n,3), calendar, buckets)]; 
+       score = [score; obj(reshape(par(i,:),n,3), buckets)]; 
     end
 
     minc(1)=min(score);   % min cost
@@ -46,57 +45,70 @@ function scheduling_pso(training_plan, calendar, obj)
     % Start iterations
     iter = 0;
     while iter < maxit
-        iter = iter + 1;
-        % update velocity = vel
-        w=(maxit-iter)/maxit; %inertia weiindxht
-        r1 = rand(popsize,n*8); % random numbers, 8 for bit count 
-        r2 = rand(popsize,n*8); % random numbers
-        % vel = C*(w*vel + c1 *r1.*(localpar-par) + c2*r2.*(ones(popsize,1)*globalpar-par));
+      valid = false;
+      iter = iter + 1;
+      % update velocity = vel
+      w=(maxit-iter)/maxit; %inertia weiindxht
+      while (~valid)
+        tmp_par = par;
+        r1 = rand(n,nsbit,popsize); % random numbers, 8 for bit count 
+        r2 = rand(n,nsbit,popsize); % random numbers
         localparBinary = [];
+        parBinary = [];
         for q = 1:popsize
           for w = 1:8
-            localparBinary(w,:,q) = dectobin(localpar(q,w+2*n)) 
+            localparBinary(w,:,q) = dectobin(localpar(q,w+2*n));
+            parBinary(w,:,q) = dectobin(par(q,w+2*n));
+            globalparBinary = dectobin(globalpar(w));
           end
         end
-        vel = vel + c1 *r1.*(localpar(:,1+2*n:3*n)-par(:,1+2*n:3*n)) + c2*r2.*(ones(popsize,1)*globalpar(:,1+2*n:3*n)-par(:,1+2*n:3*n));
+        vel = vel + c1 *r1.*(localparBinary-parBinary) + c2*r2.*(repmat(globalparBinary,8,1,10)-parBinary);
         sig = 1./(1+exp(-vel));
-        r = rand(popsize, n);
+        r = rand(n, nsbit, popsize);
         update = r > sig;
 
         % update particle positions
         for a = 1:popsize
-         par(a,1+2*n:3*n) = update(a,:);
+          for b = 1:n
+            tmp_par(a,b+2*n:3*n) = bintodec(update(b,:,a));
+          end
         end
-        par
-
-        bucket_par = par(:,1+2*n:3*n)
-        overlimit = bucket_par<=range(2);
-        underlimit = bucket_par>=range(1);
-        bucket_par=bucket_par.*overlimit+not(overlimit);
-        bucket_par=bucket_par.*underlimit;
-
-        par(:,1+2*n:3*n) = bucket_par;
-
-        % Evaluate the new swarm
-        for i = 1:popsize
-            score(i) = obj(reshape(par(i,:),n,3), calendar, buckets);
+        if sum(sum(tmp_par == 0)) == 0
+          valid = true;
         end
+      end
+      par = tmp_par;
 
-        % Updating the best local position for each particle
-        bettercost = cost < localcost;
-        localcost = localcost.*not(bettercost) + cost.*bettercost;
-        localpar(find(bettercost),:) = par(find(bettercost),:);
+      bucket_par = par(:,1+2*n:3*n);
+      overlimit = bucket_par<=range(2);
+      underlimit = bucket_par>=range(1);
+      bucket_par=bucket_par.*overlimit+not(overlimit);
+      bucket_par=bucket_par.*underlimit;
 
-        % Updating index g
-        [temp, t] = min(localcost);
-        if temp<globalcost
-            globalpar=par(t,:); indx=t; globalcost=temp;
-        end
-        [iter globalpar globalcost] % print output each iteration
-        minc(iter+1)=min(cost); % min for this iteration
-        globalmin(iter+1)=globalcost; % best min so far
-        meanc(iter+1)=mean(cost); % avg. cost for this iteration
+      par(:,1+2*n:3*n) = bucket_par;
+
+      % Evaluate the new swarm
+      for i = 1:popsize
+        score(i) = obj(reshape(par(i,:),n,3), buckets);
+      end
+
+      % Updating the best local position for each particle
+      bettercost = score < localcost;
+      localcost = localcost.*not(bettercost) + score.*bettercost;
+      localpar(find(bettercost),:) = par(find(bettercost),:);
+
+      % Updating index g
+      [temp, t] = min(localcost);
+      if temp<globalcost
+        globalpar=par(t,:); indx=t; globalcost=temp;
+      end
+      [iter globalpar globalcost]; % print output each iteration
+      minc(iter+1)=min(score); % min for this iteration
+      globalmin(iter+1)=globalcost; % best min so far
+      meanc(iter+1)=mean(score); % avg. cost for this iteration
     end
+    globalcost
+    globalpar
     figure(24)
     iters=0:length(minc)-1;
     plot(iters,minc,iters,meanc,iters,globalmin,':');
