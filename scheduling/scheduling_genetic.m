@@ -1,13 +1,16 @@
-% Takes a parameter of user_fitness_data which has the following format
-% [Umax_distance Umax_climb user_fitness]
-% and user_traits which has the following format
-% [height mass c_rr c_d]
+% Takes a parameter of training_plan which was output from a training plan
+% optmization function
+% and calendar vector which has the format of:
+% 0 => free 15 minute period
+% 1 => busy 15 minute period
+% Takes a function obj which is the objective function
 
 function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar, obj)
     global pop popnew popsel fitness fitold range buckets n nsbit;
     
+    % Generate free buckets (or slots) of time in the calendar
     buckets = bucketGenerator(calendar);
-    range = [1 size(buckets,1)];
+    range = [1 size(buckets,1)]; % range of buckets
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator
     popsize=20; % Population size
@@ -15,7 +18,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     count=0;    % counter
     pc=0.95;    % Crossover probability
     pm=0.05;    % Mutation probability
-    nsbit=floor(log2(range(2))+1);
+    nsbit=floor(log2(range(2))+1); % number of bits to represent all buckets
     n=8;        % Number of activities
     
     % Generating the initial population
@@ -32,20 +35,23 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
                 % Crossover pair
                 ii=floor(popsize*rand)+1;
                 jj=floor(popsize*rand)+1;
+                % Add children to selection pool
                 popsel=[popsel; crossover(pop(ii,:),pop(jj,:))];
-                % Evaluate the new pairs
                 count=count+2;
             end
 
             % Mutation
             if pm>rand 
                 kk=floor(popsize*rand)+1;
+                % Add mutation to selection pool
                 popsel=[popsel; mutate(pop(kk,:))];
                 count=count+1;
             end
         end
         
+        % Add current generation to selection pool
         popsel = [popsel; pop];
+        % Select next generation
         evolve();
 
         % Record the current best
@@ -58,6 +64,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     [best_score, ind] = min(bestfun);
     best_plan = reshape(bestplan(ind,:),n,3);
 
+    %initialize population
     function pop=init_gen()
         pop = zeros(popsize, n*(2+nsbit));
         for p=1:popsize
@@ -66,6 +73,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
         end
     end
 
+    % convert a schedule to a schedule with binary start times
     function bin=schedtobin(sched)
         acts = size(sched,1);
         bin = zeros(acts, 2+nsbit);
@@ -74,6 +82,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
         end
     end
 
+    % convert a schedule with binary start times to decimal start times
     function sched=bintosched(bin)
         acts = size(bin,1);
         sched = zeros(acts, 3);
@@ -82,6 +91,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
         end
     end
 
+    % convert a binary vector to a decimal number
     function dec=bintodec(bin)
         nn = length(bin);
         dec=0;
@@ -90,6 +100,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
         end
     end
 
+    % convert a decimal number to a binary vector
     function bin=dectobin(dec)
         bin = zeros(1, nsbit);
         k = 0;
@@ -134,6 +145,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     end
 
     % Crossover operator
+    % Uniform crossover of start times
     function [pair]=crossover(a,b)
         c = a;
         d = b;
@@ -149,6 +161,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
             end
         end
         
+        % If a child is no longer valid mutate it
         sched_c = bintosched(transpose(reshape(c,2+nsbit,n)));
         sched_d = bintosched(transpose(reshape(d,2+nsbit,n)));
         if (max(sched_c(:,3)) > range(2) || max(sched_c(:,3)) > range(2) ||...
@@ -181,6 +194,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     end
 
     % Mutation operator
+    % Bit flipping
     function sched=mutate(sched)
         valid = false;
         while (~valid)
@@ -193,6 +207,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
                     end
                 end
             end
+            % Ensure new mutated solution is valid
             sched_sched = bintosched(transpose(reshape(sched,2+nsbit,n)));
             if (max(sched_sched(:,3)) <= range(2) && max(sched_sched(:,3)) <= range(2) &&...
                     min(sched_sched(:,3)) >= range(1) && min(sched_sched(:,3)) >= range(1) &&...

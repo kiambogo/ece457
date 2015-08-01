@@ -8,6 +8,8 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
+% Takes a function obj which is the objective function
+
 function [best_plan, best_score, i] = training_tabu(user_fitness_data, user_traits, user_prefs, obj)
     global iter;
     
@@ -22,11 +24,14 @@ function [best_plan, best_score, i] = training_tabu(user_fitness_data, user_trai
         0 user_fitness_data(2)*1.25];
     user_fitness = user_fitness_data(3);
     
-    a=user_prefs(1);    % Number of activities
-    macro_varience = [floor(a*user_prefs(2)) ceil(a*user_prefs(3)) floor(a*user_prefs(4))];
-    bestTP = G(user_fitness, macro_varience);
-    neighbours = generateNeighbours(bestTP, search_space);
-    tabuList = zeros(8,3,iter);
+    a = user_prefs(1);  % Number of activities
+    macro_varience = [...           
+        floor(a*user_prefs(2))...   % Number of short activities
+        ceil(a*user_prefs(3))...    % Number of average actvities
+        floor(a*user_prefs(4))];    % Number of long activities
+    bestTP = G(user_fitness, macro_varience); % Initial training plan
+    neighbours = generateNeighbours(bestTP, search_space); % Generate neighbours of initial solution
+    tabuList = zeros(8,3,iter); % initialize tabu list
     
     for i = 1:iter
         for n = 1:50 

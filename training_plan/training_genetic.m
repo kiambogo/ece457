@@ -5,6 +5,8 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
+% Takes a function obj which is the objective function
+
 function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_traits, user_prefs, obj)
     global pop popnew popsel fitness fitold user_fitness n sigma;
     
@@ -20,11 +22,18 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
     mut_suc=0;          % Successful mutations
     mut_tot=0;          % Total mutations
     
+    % Range has the following format:
+        % [Distance_min Distance_max]
+        % [Time_min Time_max]
+        % [Elevation_min Elevation_max]
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
             0 user_fitness_data(2)*1.25];
-    user_fitness = user_fitness_data(3);
-    macro_varience = [floor(n*user_prefs(2)) ceil(n*user_prefs(3)) floor(n*user_prefs(4))];
+    user_fitness = user_fitness_data(3); % user's fitness level
+    macro_varience = [...
+        floor(n*user_prefs(2))...   % Number of short activities
+        ceil(n*user_prefs(3))...    % Number of average activities
+        floor(n*user_prefs(4))];    % Number of long activities
     
     % Generating the initial population
     popnew=init_gen(macro_varience);
@@ -40,6 +49,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
                 % Crossover pair
                 ii=floor(popsize*rand)+1;
                 jj=floor(popsize*rand)+1;
+                % Add children to selection pool
                 popsel=[popsel; crossover(pop(ii,:),pop(jj,:))];
                 % Evaluate the new pairs
                 count=count+2;
@@ -49,22 +59,25 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
             if pm>rand 
                 kk=floor(popsize*rand)+1;
                 mut=mutate(pop(kk,:),range);
+                % Add mutation to selection pool
                 popsel=[popsel; mut];
                 count=count+1;
-                mut_tot=mut_tot+1;
+                mut_tot=mut_tot+1; % Increase total mutations
                 fit_org=obj(reshape(pop(kk,:),n,3), user_fitness, user_traits);
                 fit_mut=obj(reshape(mut,n,3), user_fitness, user_traits);
-                % Successful mutation
+                % Successful mutation if it improves fitness
                 if (fit_mut > fit_org)
                    mut_suc=mut_suc+1; 
                 end
             end
         end
         
+        % Add current generation to selection pool
         popsel = [popsel; pop];
+        % Select next generation
         evolve();
         
-        % Adapt sigma every 5th generation
+        % Adapt sigma every 5th generation based on 1/5 rule
         if (mod(i,5) == 0)
             if (mut_tot == 0)
                sigma = 1;
@@ -97,6 +110,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
     [best_score, ind] = max(bestfun);
     best_plan = reshape(bestplan(ind,:),n,3);
 
+    %initialize population
     function pop=init_gen(macro_varience)
         pop = zeros(popsize, n*3);
         for p=1:popsize
@@ -106,7 +120,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
     end
 
     % Evolving the new generation with Stochastic universal sampling
-    % https://en.wikipedia.org/wiki/Stochastic_universal_sampling
+    % based on https://en.wikipedia.org/wiki/Stochastic_universal_sampling
     function evolve()
         % total fitness of population
         F = 0;
@@ -139,6 +153,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
     end
 
     % Crossover operator
+    % Whole arithmetic crossover
     function [pair]=crossover(a,b)
         alpha = 0.4;
         c = alpha*a + (1-alpha)*b;
@@ -146,6 +161,8 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
         pair = [c;d];
     end
 
+    % Mutation operator
+    % Add Gaussian noise to mutation candidate
     function plan=mutate(c,ss)
         plan = reshape(c,n,3);
         for a=1:n
@@ -155,6 +172,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
                     plan(a,1) + randn*sigma,...
                     plan(a,2) + randn*2*sigma,...
                     plan(a,3) + randn*4*sigma];
+                % make sure new solution is still in the solution space
                 if (plan(a,1) <= ss(1,2) && plan(a,1) >= ss(1,1) &&...
                         plan(a,2) <= ss(2,2) && plan(a,2) >= ss(2,1) &&...
                         plan(a,3) <= ss(3,2) && plan(a,3) >= ss(3,1))

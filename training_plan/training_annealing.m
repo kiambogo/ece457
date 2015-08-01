@@ -10,11 +10,15 @@
 
 function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user_traits, user_prefs, obj)
  
+    % Search space has the following format:
+        % [Distance_min Distance_max]
+        % [Time_min Time_max]
+        % [Elevation_min Elevation_max]
     search_space = ...
         [5 user_fitness_data(1)*1.25;...
         20 user_fitness_data(1)*1.25*(60/40);...
         0 user_fitness_data(2)*1.25];
-    user_fitness=user_fitness_data(3);
+    user_fitness=user_fitness_data(3); % User's fitness level
 
     T_init = 10.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
@@ -25,19 +29,26 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1; % Energy norm
-    n=user_prefs(1);    % Number of activities
-    macro_varience = [floor(n*user_prefs(2)) ceil(n*user_prefs(3)) floor(n*user_prefs(4))];
+    n=user_prefs(1); % Number of activities
+    macro_varience = [...
+        floor(n*user_prefs(2))...   % Number of short activities
+        ceil(n*user_prefs(3))...    % Number of average activities
+        floor(n*user_prefs(4))];    % Number of long activities
     guess=G(user_fitness,macro_varience); % Initial guess
     
-    % Initializing the counters i,j etc
-    i= 0; j = 0; accept = 0; totaleval = 0;
+    % Initializing the counters
+    i= 0; 
+    j = 0; 
+    accept = 0; 
+    totaleval = 0;
 
-    % Initializing various values
-    T = T_init;
+    T = T_init; % Initializing temperature
+    % Initial solution values
     E_init = obj(guess, user_fitness, user_traits);
-    E_old = E_init; E_new=E_old;
-    best=guess; % initially guessed values
-    best_obj=E_init;
+    E_old = E_init; 
+    E_new = E_old;
+    best_obj = E_init;
+    best = guess; % initially guessed values
 
     % Starting the simulated annealling
     while ((T > T_min) && (j <= max_rej) && E_new<obj_max && totaleval+i<10000)
@@ -45,7 +56,10 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
         if (i >= max_run) || (accept >= max_accept)
             totaleval = totaleval + i;
             
-            % Cooling according to a cooling schedule
+            % Cooling according to a cooling schedule:
+            % If the most recent 100 iterations haven't improved over the
+            % previous 100 iterations then increase the cooling speed by
+            % using linear cooling factor
             if (totaleval > 200)
                 last_100 = max(best_obj(totaleval-200:totaleval-101));
                 curr_100 = max(best_obj(totaleval-100:totaleval-5));
@@ -104,6 +118,7 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
             end
         end
 
+        % Keep track of best solution values
         best_obj = [best_obj; max([best_obj(end) E_old])];
     end
     

@@ -11,15 +11,24 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
+% Takes a function obj which is the objective function
+
 function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_traits, user_prefs, obj)
-    %Initialization  
+    %Initialization
+    % Range has the following format:
+        % [Distance_min Distance_max]
+        % [Time_min Time_max]
+        % [Elevation_min Elevation_max]
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
             0 user_fitness_data(2)*1.25];
         
-    user_fitness = user_fitness_data(3);
-    n=user_prefs(1);
-    macro_varience = [floor(n*user_prefs(2)) ceil(n*user_prefs(3)) floor(n*user_prefs(4))];
+    user_fitness = user_fitness_data(3); % user's fitness level
+    n=user_prefs(1); % number of activities
+    macro_varience = [...
+        floor(n*user_prefs(2))...   % Number of short activities
+        ceil(n*user_prefs(3))...    % Number of average activities
+        floor(n*user_prefs(4))];    % Number of long activities
     
     popsize = 10;   % Size of the swarm
     npar = n*3;     % Dimension of the problem
@@ -35,6 +44,7 @@ function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_tr
     end
     vel = rand(popsize,npar); % random velocities
     score = [];
+    % scores of each particle
     for i = 1:popsize
        score = [score; obj(reshape(par(i,:),n,3),user_fitness,user_traits)]; 
     end
@@ -60,25 +70,27 @@ function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_tr
         % update particle positions
         par = par + vel;
         
+        % Make sure all particles are still within the distance search space
         distance_par = par(:,1:n);
         distance_overlimit = distance_par<=range(1,2);
         distance_underlimit = distance_par>=range(1,1);
         distance_par = distance_par.*distance_overlimit + not(distance_overlimit)*range(1,2);
         distance_par = distance_par.*distance_underlimit + not(distance_underlimit)*range(1,1);
-        
+        % Make sure all particles are still within the time search space
         time_par = par(:,1+n:n*2);
         time_overlimit = time_par<=range(2,2);
         time_underlimit = time_par>=range(2,1);
         time_par = time_par.*time_overlimit + not(time_overlimit)*range(2,2);
         time_par = time_par.*time_underlimit + not(time_overlimit)*range(2,1);
-        
+        % Make sure all particles are still within the elevation search space
         elevation_par = par(:,1+2*n:n*3);
         elevation_overlimit = elevation_par<=range(3,2);
         elevation_underlimit = elevation_par>=range(3,1);
         elevation_par = elevation_par.*elevation_overlimit + not(elevation_overlimit)*range(3,2);
         elevation_par = elevation_par.*elevation_underlimit + not(elevation_overlimit)*range(3,1);
-        
+        % Build constrainted solution
         par = [distance_par time_par elevation_par];
+        
         % Evaluate the new swarm
         for i = 1:popsize
             score(i) = obj(reshape(par(i,:),n,3),user_fitness,user_traits);
@@ -93,11 +105,7 @@ function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_tr
             globalpar = par(t,:);
             globalscore = temp;
         end
-        % print output each iteration
-        %iter
-        %score
-        %reshape(globalpar,n,3)
-        %globalscore
+        
         maxc(iter+1) = max(score); % min for this iteration
         globalmax(iter+1) = globalscore; % best max so far
         meanc(iter+1) = mean(score); % avg. cost for this iteration
@@ -117,6 +125,7 @@ function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_tr
     best_plan = reshape(globalpar,n,3);
     best_score = globalmax(iter+1);
     
+    % Uncomment to see algorithm graph
 %     figure(24)
 %     iters = 0:length(maxc)-1;
 %     plot(iters,maxc,iters,meanc,iters,globalmax,':');
