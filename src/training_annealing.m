@@ -34,7 +34,7 @@ function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user
         floor(n*user_prefs(2))...   % Number of short activities
         ceil(n*user_prefs(3))...    % Number of average activities
         floor(n*user_prefs(4))];    % Number of long activities
-    guess=G(user_fitness,macro_varience); % Initial guess
+    guess=training_init(user_fitness,macro_varience); % Initial guess
     
     % Initializing the counters
     i= 0; 

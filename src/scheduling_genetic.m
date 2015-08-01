@@ -68,7 +68,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     function pop=init_gen()
         pop = zeros(popsize, n*(2+nsbit));
         for p=1:popsize
-            sched = sched_init(training_plan, buckets);
+            sched = scheduling_init(training_plan, buckets);
             pop(p,:) = reshape(transpose(schedtobin(sched)),1,n*(2+nsbit));
         end
     end

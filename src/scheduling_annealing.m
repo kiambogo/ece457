@@ -18,7 +18,7 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
     Enorm=1e-8; % Energy norm
-    guess=sched_init(training_plan, buckets); % Initial guess
+    guess=scheduling_init(training_plan, buckets); % Initial guess
     
     % Initializing the counters i,j etc
     i= 0; 

@@ -1,4 +1,4 @@
-function scheduled_TP = sched_init(training_plan, buckets)
+function scheduled_TP = scheduling_init(training_plan, buckets)
     sortedTP = sortrows(training_plan, -2);
     scheduled_TP = zeros(size(training_plan,1), size(training_plan, 2));
     for j = 1:size(sortedTP, 1)

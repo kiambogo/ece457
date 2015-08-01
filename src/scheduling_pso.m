@@ -24,7 +24,7 @@ function scheduling_pso(training_plan, calendar, obj)
     % Initializing swarm and velocities
     par = [];
     for i = 1:popsize
-      par = [par; reshape(sched_init(training_plan, buckets),1,npar)];
+      par = [par; reshape(scheduling_init(training_plan, buckets),1,npar)];
     end
     vel = rand(n,nsbit,popsize); % random velocities for each bit
     score = [];
@@ -45,11 +45,14 @@ function scheduling_pso(training_plan, calendar, obj)
     % Start iterations
     iter = 0;
     while iter < maxit
+      tmp_par = [];
       valid = false;
       iter = iter + 1;
       % update velocity = vel
       w=(maxit-iter)/maxit; %inertia weiindxht
       while (~valid)
+        iter
+        valid = false;
         tmp_par = par;
         r1 = rand(n,nsbit,popsize); % random numbers, 8 for bit count 
         r2 = rand(n,nsbit,popsize); % random numbers
@@ -75,6 +78,13 @@ function scheduling_pso(training_plan, calendar, obj)
         end
         if sum(sum(tmp_par == 0)) == 0
           valid = true;
+        end
+        for u = 1:popsize
+          if (size(unique(tmp_par(u,1+2*n:3*n)),2) == size(tmp_par(u,1+2*n:3*n),2))
+            valid = valid && true;
+          else
+            valid = false;
+          end
         end
       end
       par = tmp_par;

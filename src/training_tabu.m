@@ -29,7 +29,7 @@ function [best_plan, best_score, i] = training_tabu(user_fitness_data, user_trai
         floor(a*user_prefs(2))...   % Number of short activities
         ceil(a*user_prefs(3))...    % Number of average actvities
         floor(a*user_prefs(4))];    % Number of long activities
-    bestTP = G(user_fitness, macro_varience); % Initial training plan
+    bestTP = training_init(user_fitness, macro_varience); % Initial training plan
     neighbours = generateNeighbours(bestTP, search_space); % Generate neighbours of initial solution
     tabuList = zeros(8,3,iter); % initialize tabu list
     

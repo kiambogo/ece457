@@ -1,6 +1,4 @@
-% macro_varience = [short avg long] => number of short/avg/long activities
-
-function training_plan = G(lvl, macro_varience)
+function training_plan = training_init(lvl, macro_varience)
     short = macro_varience(1);
     avg = macro_varience(2);
     acts = sum(macro_varience);
@@ -21,5 +19,4 @@ function training_plan = G(lvl, macro_varience)
             training_plan(j,1) = training_plan(j,1) + 1;
         end
     end
-    %output(training_plan, lvl, [180 69 0.004 1.0])
 end
