@@ -11,7 +11,8 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
-function training_aco(user_fitness_data, user_traits, user_prefs, obj)
+function [best_plan best_score it] = training_aco(user_fitness_data, user_traits, user_prefs, obj)
+    rng('default');
     rng('shuffle');
     
     range = [5 user_fitness_data(1)*1.25;...
@@ -59,17 +60,14 @@ function training_aco(user_fitness_data, user_traits, user_prefs, obj)
     vis = 1./path_dist; % visibility equal inverse of distance
     phmone = .1 * ones(Npaths, n*3); % initialized pheromones between cities
     
-    % a1=0 - closest city is selected
-    % be=0 - algorithm only works w/ pheromones and not distance of city
-    % Q - close to the lenght of the optimal tour
     % rr - trail decay
     % maxit - max number of iterations
-    maxit = 1000;
-    a = 2;
-    b = 6;
-    rr = 0.5;
-    Q = sum(1./(1:8));
-    dbest = 9999999;
+    maxit = 500;
+    a = 0.5; % alpha
+    b = 0.5; % beta
+    rr = 0.1; % decay rate
+    Q = 4;
+    dbest = Inf;
     e = 5;
     
     for ia=1:Nants
@@ -77,57 +75,47 @@ function training_aco(user_fitness_data, user_traits, user_prefs, obj)
     end
     
     for it=1:maxit
-        % find the city tour for each ant
-        % st is the current city
-        % nxt contains the remaining cities to be visited
+        % find the training plan for each ant
+        % st is the current position
+        % nxt contains list of next paths
         for ia=1:Nants
-            for iq=2:Ncity-1
-                [iq tour(ia,:)];
-                st=tour(ia,iq-1); nxt=tour(ia,iq:Ncity);
-                prob=((phmone(st,nxt).^a).*(vis(st,nxt).^b)).^sum((phmone(st,nxt).^a).*(vis(st,nxt).^b));
-                rcity=rand;
+            for iq=1:n*3
+                prob=((phmone(:,iq).^a).*(vis(:,iq).^b))./sum((phmone(:,iq).^a).*(vis(:,iq).^b));
+                rpath=rand;
                 for iz=1:length(prob)
-                    if rcity<sum(prob(1:iz))
-                        newcity=iq-1+iz; % next city to be visited
+                    if rpath<sum(prob(1:iz))
+                        newpath=iz; % next path to be taken
                         break
                     end % if
                 end % iz
-                temp=tour(ia,newcity); % puts the new city
-                % selected next in line
-                tour(ia,newcity)=tour(ia,iq);
-                tour(ia,iq)=temp;
+                ants(ia,iq)=newpath;
             end % iq
-        end % ia
+        end % ia        
         % calculate the length of each tour and pheromone distribution
-        phtemp=zeros(Ncity,Ncity);
+        phtemp=zeros(Npaths, n*3);
         for ic=1:Nants
-            dist(ic,1)=0;
-            for id=1:Ncity
-                dist(ic,1)=dist(ic)+dcity(tour(ic,id),tour(ic,id+1));
-                phtemp(tour(ic,id),tour(ic,id+1))=Q/dist(ic,1);
+            dist(ic)=0;
+            for id=1:n*3
+                dist(ic)=dist(ic)+path_dist(ants(ic,id),id);
+                phtemp(ants(ic,id),id) = phtemp(ants(ic,id),id) + Q/dist(ic);
             end % id
         end % ic
-        [dmin,ind]=min(dist);
-        if dmin<dbest
-            dbest=dmin;
+        [dmin,ind] = min(dist);
+        if dmin < dbest
+            dbest = dmin;
+            pbest = reshape(ants(ind,:),n,3);
         end % if
         % pheromone for elite path
-        ph1=zeros(Ncity,Ncity);
-        for id=1:Ncity
-            ph1(tour(ind,id),tour(ind,id+1))=Q/dbest;
+        ph1 = zeros(Npaths, n*3);
+        for id=1:n*3
+            ph1(ants(ind,id),id) = Q/dmin;
         end % id
         % update pheromone trails
-        phmone=(1-rr)*phmone+phtemp+e*ph1;
-        dd(it,:)=[dbest dmin];
-        [it dmin dbest]
+        phmone = (1-rr)*phmone + phtemp + e*ph1;
+        dd(it,:) = [dbest dmin];
+        %[it dmin dbest]
     end %it
 
-    [tour,dist]
-    figure(1)
-    plot(xcity(tour(ind,:)),ycity(tour(ind,:)),xcity,ycity,'o')
-    set(gcf,'color','w');
-    axis square
-    figure(2);
-    plot([1:maxit],dd(:,1),[1:maxit],dd(:,2))
-    set(gcf,'color','w');
+    best_plan = [transpose(distances(pbest(:,1))) transpose(times(pbest(:,2))) transpose(elevations(pbest(:,3)))];
+    best_score = obj(best_plan, user_fitness, user_traits);
 end
