@@ -125,6 +125,17 @@ function run_button_Callback(hObject, eventdata, handles)
 % hObject    handle to run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+max_distance = str2num(get(handles.max_distance,'String'));
+max_climb = str2num(get(handles.max_climb,'String'));
+fitness_level = str2num(get(handles.fitness_level,'String'));
+height = str2num(get(handles.height,'String'));
+mass = str2num(get(handles.mass,'String'));
+num_activities = str2num(get(handles.num_activities,'String'));
+pcn_short = str2num(get(handles.pcn_short,'String'));
+pcn_medium = str2num(get(handles.pcn_medium,'String'));
+pcn_long = str2num(get(handles.pcn_long,'String'));
+
+
 
 
 
