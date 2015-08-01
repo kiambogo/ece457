@@ -1,5 +1,13 @@
+% Takes a parameter of training_plan which was output from a training plan
+% optmization function
+% and calendar vector which has the format of:
+% 0 => free 15 minute period
+% 1 => busy 15 minute period
+% Takes a function obj which is the objective function
+
 function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
+    % Generate free buckets (or slots) of time in the calendar
     buckets = bucketGenerator(calendar);
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
@@ -9,17 +17,22 @@ function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calend
     max_accept = 15; % Maximum number of accept
     k = 1; % Boltzmann constant
     alpha=0.95; % Cooling factor
-    Enorm=1e-8; % Energy norm (eg, Enorm=le-8)
+    Enorm=1e-8; % Energy norm
     guess=sched_init(training_plan, buckets); % Initial guess
     
     % Initializing the counters i,j etc
-    i= 0; j = 0; accept = 0; totaleval = 0;
+    i= 0; 
+    j = 0; 
+    accept = 0; 
+    totaleval = 0;
 
     % Initializing various values
     T = T_init;
+    % Initial solution values
     E_init = obj(guess, buckets);
-    E_old = E_init; E_new=E_old;
-    best=guess; % initially guessed values
+    E_old = E_init;
+    E_new = E_old;
+    best = guess; % initially guessed values
 
     % Starting the simulated annealling
     while ((T > T_min) && (j <= max_rej) && E_new>obj_min && totaleval+i<10000)

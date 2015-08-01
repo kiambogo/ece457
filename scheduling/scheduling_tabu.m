@@ -2,10 +2,12 @@
 % Performs an optimization on schedules of activities in an attempt to find
 % an optimal schedule for the training plan
 
-% Takes a parameter of user_fitness_data which has the following format
-% [Umax_distance Umax_climb user_fitness]
-% and user_traits which has the following format
-% [height mass c_rr c_d]
+% Takes a parameter of training_plan which was output from a training plan
+% optmization function
+% and calendar vector which has the format of:
+% 0 => free 15 minute period
+% 1 => busy 15 minute period
+% Takes a function obj which is the objective function
 
 function [a, score, i] = scheduling_tabu(training_plan, calendar, obj)
     iter = 1000;
