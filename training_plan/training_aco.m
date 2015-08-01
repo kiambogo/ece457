@@ -11,7 +11,7 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
-function [best_plan best_score it] = training_aco(user_fitness_data, user_traits, user_prefs, obj)
+function [best_plan, best_score, it] = training_aco(user_fitness_data, user_traits, user_prefs, obj)
     rng('default');
     rng('shuffle');
     
@@ -20,7 +20,7 @@ function [best_plan best_score it] = training_aco(user_fitness_data, user_traits
             0 user_fitness_data(2)*1.25];
     
     n = user_prefs(1);  % number of activities
-    Npaths = 50;        % number of options for each variable
+    Npaths = 100;        % number of options for each variable
     Nants = Npaths;     % number of ants = number of paths
     
     distances = linspace(range(1,1), range(1,2), Npaths);
@@ -113,7 +113,7 @@ function [best_plan best_score it] = training_aco(user_fitness_data, user_traits
         % update pheromone trails
         phmone = (1-rr)*phmone + phtemp + e*ph1;
         dd(it,:) = [dbest dmin];
-        %[it dmin dbest]
+        [it dmin dbest]
     end %it
 
     best_plan = [transpose(distances(pbest(:,1))) transpose(times(pbest(:,2))) transpose(elevations(pbest(:,3)))];

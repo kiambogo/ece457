@@ -11,7 +11,7 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
-function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, obj)
+function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_traits, user_prefs, obj)
     %Initialization  
     range = [5 user_fitness_data(1)*1.25;...
             20 user_fitness_data(1)*1.25*(60/40);...
@@ -108,15 +108,19 @@ function [globalpar] = training_pso(user_fitness_data, user_traits, user_prefs, 
             curr_100 = max(globalmax(iter-100:iter));
             pct_inc = (curr_100 - last_100)/last_100 * 100;
             if (pct_inc < 0.1)
-                iter
                 break;
             end
         end
     end
-    figure(24)
-    iters = 0:length(maxc)-1;
-    plot(iters,maxc,iters,meanc,iters,globalmax,':');
-    xlabel('generation');ylabel('score');
-    text(0,maxc(1),'best');text(1,maxc(2),'population average')
-    set(gcf,'color','w');
+    
+    %set return values
+    best_plan = reshape(globalpar,n,3);
+    best_score = globalmax(iter+1);
+    
+%     figure(24)
+%     iters = 0:length(maxc)-1;
+%     plot(iters,maxc,iters,meanc,iters,globalmax,':');
+%     xlabel('generation');ylabel('score');
+%     text(0,maxc(1),'best');text(1,maxc(2),'population average')
+%     set(gcf,'color','w');
 end

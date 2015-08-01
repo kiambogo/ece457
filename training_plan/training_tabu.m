@@ -5,8 +5,10 @@
 % [Umax_distance Umax_climb user_fitness]
 % and user_traits which has the following format
 % [height mass c_rr c_d]
+% and user_prefs which has the following format
+% [num_acts pct_short pct_avg pct_long]
 
-function a = training_tabu(user_fitness_data, user_traits, obj)
+function [best_plan, best_score, i] = training_tabu(user_fitness_data, user_traits, user_prefs, obj)
     global iter;
     
     iter = 1000;
@@ -18,18 +20,21 @@ function a = training_tabu(user_fitness_data, user_traits, obj)
         [5 user_fitness_data(1)*1.25;...
         20 user_fitness_data(1)*1.25*(60/40);...
         0 user_fitness_data(2)*1.25];
-    %bestTP = init(search_space)
-    %bestTP = [21 45 50; 22 45 75; 28 60 100; 29 60 125; 56 120 150; 57 120 175; 84 180 200; 85 180 225];
-    bestTP = G(user_fitness_data(3));
+    user_fitness = user_fitness_data(3);
+    
+    a=user_prefs(1);    % Number of activities
+    macro_varience = [floor(a*user_prefs(2)) ceil(a*user_prefs(3)) floor(a*user_prefs(4))];
+    bestTP = G(user_fitness, macro_varience);
     neighbours = generateNeighbours(bestTP, search_space);
     tabuList = zeros(8,3,iter);
+    
     for i = 1:iter
         for n = 1:50 
             neighbour = neighbours(:,:,n);
             % If the neighbour is a better training plan, select it
             % This is determined by maximizing the fitness function
-            neighbour_fitness = obj(neighbour, user_fitness_data(3), user_traits);
-            current_best_fitness = obj(bestTP, user_fitness_data(3), user_traits);
+            neighbour_fitness = obj(neighbour, user_fitness, user_traits);
+            current_best_fitness = obj(bestTP, user_fitness, user_traits);
 
             if (neighbour_fitness >= current_best_fitness)
                 % If the selected TP is not in the Tabu list, then choose it
@@ -40,9 +45,9 @@ function a = training_tabu(user_fitness_data, user_traits, obj)
             end
             neighbours = generateNeighbours(bestTP, search_space);
         end
-        a = bestTP;
+        best_plan = bestTP;
     end
-    output(a, user_fitness_data(3), user_traits);
+    best_score = obj(best_plan, user_fitness, user_traits);
 end
 
 function neighbours = generateNeighbours(trainingPlan, ss)

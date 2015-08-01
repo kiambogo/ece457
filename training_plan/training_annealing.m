@@ -8,7 +8,7 @@
 
 % Takes a function obj which is the objective function
 
-function [best, obj_opt, best_obj, totaleval] = training_annealing(user_fitness_data, user_traits, user_prefs, obj)
+function [best, obj_opt, totaleval] = training_annealing(user_fitness_data, user_traits, user_prefs, obj)
  
     search_space = ...
         [5 user_fitness_data(1)*1.25;...

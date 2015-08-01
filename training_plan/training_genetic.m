@@ -5,13 +5,13 @@
 % and user_prefs which has the following format
 % [num_acts pct_short pct_avg pct_long]
 
-function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_traits, user_prefs, obj)
+function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_traits, user_prefs, obj)
     global pop popnew popsel fitness fitold user_fitness n sigma;
     
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator
     popsize=20;         % Population size
-    MaxGen=1000;         % Max number of generations
+    MaxGen=1000;        % Max number of generations
     count=0;            % counter
     pc=0.95;            % Crossover probability
     pm=0.05;            % Mutation probability
@@ -92,6 +92,10 @@ function [bestplan, bestfun, count] = training_genetic(user_fitness_data, user_t
             end
         end
     end
+    
+    %set return values
+    [best_score, ind] = max(bestfun);
+    best_plan = reshape(bestplan(ind,:),n,3);
 
     function pop=init_gen(macro_varience)
         pop = zeros(popsize, n*3);
