@@ -121,39 +121,38 @@ end
 
 
 % --- Executes on button press in run_button.
-function run_button_Callback(hObject, eventdata, handles)
+function run_button_Callback(hObject, eventdata, handles) %#ok<*DEFNU>
 % hObject    handle to run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+'computing...'
 max_distance = str2num(get(handles.max_distance,'String'));
 max_climb = str2num(get(handles.max_climb,'String'));
 fitness_level = str2num(get(handles.fitness_level,'String'));
 height = str2num(get(handles.height,'String'));
 mass = str2num(get(handles.mass,'String'));
-num_activities = str2num(get(handles.num_activities,'String'));
+num_activities = 8;
 pcn_short = str2num(get(handles.pcn_short,'String'));
-pcn_medium = str2num(get(handles.pcn_medium,'String'));
+pcn_medium = str2num(get(handles.pcn_medium,'String')); %#ok<*ST2NM>
 pcn_long = str2num(get(handles.pcn_long,'String'));
 
 arg1 = [max_distance, max_climb, fitness_level];
 arg2 = [height, mass, 0.004, 1.0];
 arg3 = [num_activities pcn_short pcn_medium pcn_long];
 
-set(handles.outputTextBox, 'String', 'Generating training plan');
-
-plan_selected = get(handles.training_algo, 'value')
+plan_selected = get(handles.training_algo, 'value');
 switch plan_selected
     case 1
-        plan = training_tabu(arg1, arg2, arg3, @training_objective)
+        plan = training_tabu(arg1, arg2, arg3, @training_objective);
     case 2
-        plan = training_annealing(arg1, arg2, arg3, @training_objective)
+        plan = training_annealing(arg1, arg2, arg3, @training_objective);
     case 3
-        plan = training_genetic(arg1, arg2, arg3, @training_objective)
+        plan = training_genetic(arg1, arg2, arg3, @training_objective);
     case 4
-        plan = training_pso(arg1, arg2, arg3, @training_objective)
+        plan = training_pso(arg1, arg2, arg3, @training_objective);
     case 5
-        plan = training_aco(arg1, arg2, arg3, @training_objective)
+        plan = training_aco(arg1, arg2, arg3, @training_objective);
     otherwise
 end
 
@@ -162,26 +161,51 @@ weekend = [ones(1,24) zeros(1,60) ones(1,12)];
 weekday = [ones(1,24) zeros(1,12) ones(1,32) zeros(1,16) ones(1,12)];
 cal = [weekend weekday weekday weekday weekday weekday weekend weekend weekday weekday weekday weekday weekday weekend];
 
-set(handles.outputTextBox, 'String', 'Scheduling Training Activities');
-schedule_selected = get(handles.scheduling_algo, 'value')
+schedule_selected = get(handles.scheduling_algo, 'value');
 switch schedule_selected
     case 1
-        schedule = scheduling_tabu(plan, cal, @scheduling_objective)
+        schedule = scheduling_tabu(plan, cal, @scheduling_objective);
     case 2
-        schedule = scheduling_annealing(plan, cal, @scheduling_objective)
+        schedule = scheduling_annealing(plan, cal, @scheduling_objective);
     case 3
-        schedule = scheduling_genetic(plan, cal, @scheduling_objective)
+        schedule = scheduling_genetic(plan, cal, @scheduling_objective);
     case 4
-        schedule = scheduling_pso(plan, cal, @scheduling_objective)
+        schedule = scheduling_pso(plan, cal, @scheduling_objective);
     case 5
-        schedule = schedlung_aco(plan, cal, @scheduling_objective)
+        schedule = schedlung_aco(plan, cal, @scheduling_objective);
     otherwise
 end
 
+plan = fix(plan);
+Activities = {'1';'2';'3';'4';'5';'6';'7';'8'};
+ColNames = {'Distance_km';'Duration_min'; 'Elevation_m'};
+Distance = plan(:,1);
+Duration = plan(:,2);
+Elevation = plan(:,3);
+Training_Plan = table(Distance, Duration, Elevation, 'RowNames', Activities, 'VariableNames', ColNames)
 
 
+buckets = scheduling_BucketGenerator(cal);
+sorted_sched = zeros(8,4);
+for p = 1:size(schedule,1)
+    sorted_sched(p,:) = [schedule(p,1) schedule(p,2) schedule(p,3) buckets(schedule(p,3),1)];
+end
+schedule = sortrows(sorted_sched, 4);
+schedule = schedule(:,1:3);
 
-% set(handles.outputTextBox, 'String', max_distance);
+Activities = {'1';'2';'3';'4';'5';'6';'7';'8'};
+Duration = schedule(:,2)*15;
+Start_Time = [];
+for p = 1:size(schedule,1)
+    day = 12+floor((buckets(schedule(p,3),1)-1)/96);
+    hour = floor(mod(buckets(schedule(p,3),1)-1, 96)/4);
+    minute = floor(mod(mod(buckets(schedule(p,3),1)-1, 96), 4)*15);
+    Start_Time = [Start_Time; {datestr(datenum(2015, 7, day, hour, minute, 0),0)}];
+end
+schedule = [schedule; Start_Time];
+ColNames = {'Duration_min'; 'Start_Time'};
+Schedule = table(Duration, Start_Time, 'RowNames', Activities, 'VariableNames', ColNames)
+'done'
 
 
 
