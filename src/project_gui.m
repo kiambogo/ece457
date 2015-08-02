@@ -135,6 +135,23 @@ pcn_short = str2num(get(handles.pcn_short,'String'));
 pcn_medium = str2num(get(handles.pcn_medium,'String'));
 pcn_long = str2num(get(handles.pcn_long,'String'));
 
+arg1 = [max_distance, max_climb, fitness_level];
+arg2 = [height, mass, 0.004, 1.0];
+arg3 = [num_activities pcn_short pcn_medium pcn_long];
+
+set(handles.outputTextBox, 'String', 'Generating training plan');
+plan = training_tabu(arg1, arg2, arg3, @training_objective);
+
+weekend = [ones(1,24) zeros(1,60) ones(1,12)];
+weekday = [ones(1,24) zeros(1,12) ones(1,32) zeros(1,16) ones(1,12)];
+cal = [weekend weekday weekday weekday weekday weekday weekend weekend weekday weekday weekday weekday weekday weekend];
+
+set(handles.outputTextBox, 'String', 'Scheduling Training Activities');
+scheduling_annealing(plan, cal, @scheduling_objective)
+
+
+
+% set(handles.outputTextBox, 'String', max_distance);
 
 
 
