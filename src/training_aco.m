@@ -40,7 +40,7 @@ function [best_plan, best_score, it] = training_aco(user_fitness_data, user_trai
         ceil(n*user_prefs(3))...    % Number of average activities
         floor(n*user_prefs(4))];    % Number of long activities
     % Benchmark solution path scores are based on
-    benchmark = G(user_fitness, macro_varience); 
+    benchmark = training_init(user_fitness, user_traits, macro_varience); 
     benchscore = obj(benchmark, user_fitness, user_traits);
     benchmark = reshape(benchmark,1,n*3);
     

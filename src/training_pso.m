@@ -40,7 +40,7 @@ function [best_plan, best_score, iter] = training_pso(user_fitness_data, user_tr
     % random population of training plans
     par = [];
     for i = 1:popsize
-       par = [par; reshape(G(user_fitness, macro_varience),1,npar)];
+       par = [par; reshape(training_init(user_fitness, user_traits, macro_varience),1,npar)];
     end
     vel = rand(popsize,npar); % random velocities
     score = [];

@@ -51,7 +51,7 @@ function scheduling_pso(training_plan, calendar, obj)
       % update velocity = vel
       w=(maxit-iter)/maxit; %inertia weiindxht
       while (~valid)
-        iter
+%        iter
         valid = false;
         tmp_par = par;
         r1 = rand(n,nsbit,popsize); % random numbers, 8 for bit count 
@@ -82,8 +82,8 @@ function scheduling_pso(training_plan, calendar, obj)
         for u = 1:popsize
           if (size(unique(tmp_par(u,1+2*n:3*n)),2) == size(tmp_par(u,1+2*n:3*n),2))
             valid = valid && true;
-          else
-            valid = false;
+%          else
+%            valid = false;
           end
         end
       end
