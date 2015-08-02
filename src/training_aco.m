@@ -73,6 +73,7 @@ function [best_plan, best_score, it] = training_aco(user_fitness_data, user_trai
     for id=1:n*3
        path_dist(:,id) = 1. ./ (1. + path_dist(:,id) - min(path_dist(:,id)));
     end
+    path_dist
     vis = 1./path_dist; % visibility equal inverse of distance
     phmone = .1 * ones(Npaths, n*3); % initialized pheromones between cities
 

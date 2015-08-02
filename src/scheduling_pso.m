@@ -2,12 +2,7 @@
 % Based on PSO by Haupt & Haupt, 2003
 % © Trifecta Labs
 
-% Takes a parameter of user_fitness_data which has the following format
-% [Umax_distance Umax_climb user_fitness]
-% and user_traits which has the following format
-% [height mass c_rr c_d]
-
-function scheduling_pso(training_plan, calendar, obj)
+function [best_sched, best_score, iter] = scheduling_pso(training_plan, calendar, obj)
     %Initialization
     search_space = [0 1344];
     buckets = scheduling_BucketGenerator(calendar);
@@ -82,8 +77,8 @@ function scheduling_pso(training_plan, calendar, obj)
         for u = 1:popsize
           if (size(unique(tmp_par(u,1+2*n:3*n)),2) == size(tmp_par(u,1+2*n:3*n),2))
             valid = valid && true;
-%          else
-%            valid = false;
+          %else
+          %  valid = false;
           end
         end
       end
@@ -117,14 +112,16 @@ function scheduling_pso(training_plan, calendar, obj)
       globalmin(iter+1)=globalcost; % best min so far
       meanc(iter+1)=mean(score); % avg. cost for this iteration
     end
-    globalcost
-    globalpar
-    figure(24)
-    iters=0:length(minc)-1;
-    plot(iters,minc,iters,meanc,iters,globalmin,':');
-    xlabel('generation');ylabel('cost');
-    text(0,minc(1),'best');text(1,minc(2),'population average')
-    set(gcf,'color','w');
+    best_sched = reshape(globalpar,n,3);
+    best_score = globalmin(iter+1);
+
+    % Uncomment to see algorithm graph
+%    figure(24)
+%    iters=0:length(minc)-1;
+%    plot(iters,minc,iters,meanc,iters,globalmin,':');
+%    xlabel('generation');ylabel('cost');
+%    text(0,minc(1),'best');text(1,minc(2),'population average')
+%    set(gcf,'color','w');
 
     function dec=bintodec(bin)
         nn = length(bin);
