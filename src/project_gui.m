@@ -125,6 +125,7 @@ function run_button_Callback(hObject, eventdata, handles)
 % hObject    handle to run_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
 max_distance = str2num(get(handles.max_distance,'String'));
 max_climb = str2num(get(handles.max_climb,'String'));
 fitness_level = str2num(get(handles.fitness_level,'String'));
@@ -140,14 +141,43 @@ arg2 = [height, mass, 0.004, 1.0];
 arg3 = [num_activities pcn_short pcn_medium pcn_long];
 
 set(handles.outputTextBox, 'String', 'Generating training plan');
-plan = training_tabu(arg1, arg2, arg3, @training_objective);
+
+plan_selected = get(handles.training_algo, 'value')
+switch plan_selected
+    case 1
+        plan = training_tabu(arg1, arg2, arg3, @training_objective)
+    case 2
+        plan = training_annealing(arg1, arg2, arg3, @training_objective)
+    case 3
+        plan = training_genetic(arg1, arg2, arg3, @training_objective)
+    case 4
+        plan = training_pso(arg1, arg2, arg3, @training_objective)
+    case 5
+        plan = training_aco(arg1, arg2, arg3, @training_objective)
+    otherwise
+end
+
 
 weekend = [ones(1,24) zeros(1,60) ones(1,12)];
 weekday = [ones(1,24) zeros(1,12) ones(1,32) zeros(1,16) ones(1,12)];
 cal = [weekend weekday weekday weekday weekday weekday weekend weekend weekday weekday weekday weekday weekday weekend];
 
 set(handles.outputTextBox, 'String', 'Scheduling Training Activities');
-scheduling_annealing(plan, cal, @scheduling_objective)
+schedule_selected = get(handles.scheduling_algo, 'value')
+switch schedule_selected
+    case 1
+        schedule = scheduling_tabu(plan, cal, @scheduling_objective)
+    case 2
+        schedule = scheduling_annealing(plan, cal, @scheduling_objective)
+    case 3
+        schedule = scheduling_genetic(plan, cal, @scheduling_objective)
+    case 4
+        schedule = scheduling_pso(plan, cal, @scheduling_objective)
+    case 5
+        schedule = schedlung_aco(plan, cal, @scheduling_objective)
+    otherwise
+end
+
 
 
 
