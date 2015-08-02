@@ -1,5 +1,9 @@
 %https://strava.zendesk.com/entries/20959332-Power-Calculations
-function p = P(x)
+function p = P(x, user_traits)
+  height = user_traits(1);
+  mass = user_traits(2);
+  c_rr = user_traits(3);
+  c_d = user_traits(4);
   d = x(1);
   t = x(2);
   e = x(3);

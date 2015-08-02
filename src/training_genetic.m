@@ -114,7 +114,7 @@ function [best_plan, best_score, i] = training_genetic(user_fitness_data, user_t
     function pop=init_gen(macro_varience)
         pop = zeros(popsize, n*3);
         for p=1:popsize
-            plan = training_init(user_fitness, macro_varience);
+            plan = training_init(user_fitness, user_traits, macro_varience);
             pop(p,:) = reshape(plan,1,n*3);
         end
     end
