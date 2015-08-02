@@ -9,7 +9,7 @@ function [best_plan, best_score, i] = scheduling_genetic(training_plan, calendar
     global pop popnew popsel fitness fitold range buckets n nsbit;
     
     % Generate free buckets (or slots) of time in the calendar
-    buckets = bucketGenerator(calendar);
+    buckets = scheduling_BucketGenerator(calendar);
     range = [1 size(buckets,1)]; % range of buckets
     % Initializing the parameters
     rng('shuffle');     % Reset the random generator

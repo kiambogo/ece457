@@ -10,7 +10,7 @@
 function scheduling_pso(training_plan, calendar, obj)
     %Initialization
     search_space = [0 1344];
-    buckets = bucketGenerator(calendar);
+    buckets = scheduling_BucketGenerator(calendar);
     range = [1 size(buckets,1)];
     n = size(training_plan, 1);
     nsbit=floor(log2(range(2))+1);

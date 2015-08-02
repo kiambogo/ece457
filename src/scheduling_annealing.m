@@ -8,7 +8,7 @@
 function [best, obj_opt, totaleval] = scheduling_annealing(training_plan, calendar, obj)
  
     % Generate free buckets (or slots) of time in the calendar
-    buckets = bucketGenerator(calendar);
+    buckets = scheduling_BucketGenerator(calendar);
     T_init = 1.0; % Initial temperature
     T_min = 1e-10; % Final stopping temperature
     obj_min = -1e+100; % Min value of the function

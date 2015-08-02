@@ -17,10 +17,10 @@ function [a, score, i] = scheduling_tabu(training_plan, calendar, obj)
     search_space = [0 1344];
     range = [1+1 1344-2];
     
-    buckets = bucketGenerator(calendar);
+    buckets = scheduling_BucketGenerator(calendar);
     bestSched = scheduling_init(training_plan, buckets);
     init_score = scheduling_objective(bestSched, buckets)
-    neighbours = generateNeighbours(bestSched, bucketGenerator(calendar));
+    neighbours = generateNeighbours(bestSched, buckets);
     tabuList = zeros(8,3,iter);
     for i = 1:iter
         for n = 1:50 
@@ -38,7 +38,7 @@ function [a, score, i] = scheduling_tabu(training_plan, calendar, obj)
                 end
             end
         end
-        neighbours = generateNeighbours(bestSched, bucketGenerator(calendar));
+        neighbours = generateNeighbours(bestSched, buckets);
         a = bestSched;
     end
     
