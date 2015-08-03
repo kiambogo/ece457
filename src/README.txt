@@ -27,3 +27,9 @@ scheduling_aco(TP, cal, @scheduling_objective);
 
 GUI Instructions
 ================
+The GUI is designed to help a user change the inputs to the algorithms. The information about an athelete, along with the athletes preferences are able to be entered however the calendar used is a default calendar. The GUI also allows the user to select which optimization algorithm will be used for the two parts, training plan generation and activity scheduling.
+
+To open the GUI, run the file "project_gui.m". The output can be found on the console after clicking "Run" in the GUI and waiting for the computation to finish.
+
+Examples for each input are included as default values when the form opens.
+
