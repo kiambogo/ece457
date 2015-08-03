@@ -12,7 +12,7 @@ function [best_sched, best_score, iter] = scheduling_pso(training_plan, calendar
     % Initializing variables
     popsize = 10; % Size of the swarm
     npar = n * 3; % Dimension of the problem
-    maxit = 100; % Maximum number of iterations
+    maxit = 500; % Maximum number of iterations
     c1 = 1; % cognitive parameter
     c2 = 4-c1; % social parameter
     C=1; % constriction factor

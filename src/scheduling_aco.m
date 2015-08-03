@@ -18,7 +18,7 @@ function [best_sched, best_score, it] = scheduling_aco(training_plan, calendar, 
     % Benchmark solution path scores are based on
     benchmark = scheduling_init(training_plan, buckets);
     benchscore = obj(benchmark, buckets); 
-    benchmark = reshape(benchmark,1,n*3)
+    benchmark = reshape(benchmark,1,n*3);
     
     % Initialize distance matrix
     path_dist = zeros(Npaths, n*3);
@@ -32,13 +32,11 @@ function [best_sched, best_score, it] = scheduling_aco(training_plan, calendar, 
             path_dist(ic,id) = path_score - benchscore;
         end
     end
-    path_dist
     % Set path distances equal to the inverse of the scores relative to the
     % minimum benchmark score difference
     for id=1:n
        path_dist(:,id) = 1. ./ (1. + path_dist(:,id) - min(path_dist(:,id)));
     end
-    path_dist
     vis = 1./path_dist; % visibility equal inverse of distance
     phmone = .1 * ones(Npaths, n); % initialized pheromones between cities
 
@@ -85,7 +83,6 @@ function [best_sched, best_score, it] = scheduling_aco(training_plan, calendar, 
         if dmin < dbest
             dbest = dmin;
             pbest = reshape(ants(ind,:),n,1);
-            pbest
         end % if
         % pheromone for elite path
         ph1 = zeros(Npaths, n);
