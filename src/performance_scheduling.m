@@ -29,7 +29,7 @@ for f = 1:5
             case 4
                 [sch, score, iter] = scheduling_pso(plan, cal, @scheduling_objective);
             case 5
-                [sch, score, iter] = schedlung_aco(plan, cal, @scheduling_objective);
+                [sch, score, iter] = scheduling_aco(plan, cal, @scheduling_objective);
             otherwise
         end
         t2 = cputime;
