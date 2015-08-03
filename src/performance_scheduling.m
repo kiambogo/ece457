@@ -6,12 +6,12 @@ weekday = [ones(1,24) zeros(1,12) ones(1,32) zeros(1,16) ones(1,12)];
 cal = [weekend weekday weekday weekday weekday weekday weekend weekend weekday weekday weekday weekday weekday weekend];
 plan = [21 45 50; 22 45 75; 28 60 100; 29 60 125; 56 120 150; 57 120 175; 125 300 200; 126 300 225];
 
-j = 10;
+j = 30;
 score_data = [];
 iteration_data = [];
 timing_data = [];
 
-for f = 1:5
+for f = 5:5
     scores = zeros(1,j);
     iterations = zeros(1,j);
     timings = zeros(1,j);
