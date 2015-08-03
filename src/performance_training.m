@@ -10,13 +10,13 @@ score_data = [];
 iteration_data = [];
 timing_data = [];
 
-for f = 1:5
+for f = 5:5
     scores = zeros(1,j);
     iterations = zeros(1,j);
     timings = zeros(1,j);
     
     for(i = 1:j)
-        
+        i
         t1 = cputime;
         switch f
             case 1
@@ -45,3 +45,5 @@ end
 score_data
 iteration_data
 timing_data
+beep on
+beep
