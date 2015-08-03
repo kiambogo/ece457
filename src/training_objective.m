@@ -15,57 +15,77 @@ function fitness = training_objective(training_plan, user_fitness, user_traits)
     %https://en.wikipedia.org/wiki/Drag_coefficient, typically about 1.0
     c_d = user_traits(4);
 
+    %calculate initial fitness based on efforts from each activity
     fitness = 0;
     for i=1:size(training_plan)
         fitness = fitness + (W(training_plan(i,:)));
     end
+    %penalize based on constraints
     fitness = fitness - H(training_plan) - Q(training_plan, user_fitness) - V(training_plan);
+    %minimum fitness of zero
     fitness = heaviside(fitness);
 
+    %effort for an activity
     function w = W(x)
+        %short activity
         if (x(2) >= 30 && x(2) < 60)
             w=120+randn(1)*15;
+        %average activity
         elseif (x(2) >= 60 && x(2) <= 120)
             w=250+randn(1)*30;
+        %long activity
         else
             w=2.75*x(2);
         end
     end
 
+    %penalty for receovery days
     function h = H(X)
+        %estimate total recovery time required
         recovery_time = 0;
         for j=1:size(X)
             recovery_time = recovery_time + (W(X(j,:)) / 200);
         end
+        %penalty based on how much longer recovery time is than the length
+        %of the training plan
         h = 500 * heaviside(recovery_time - length);
     end
 
+    %penalty for feasibility
     function q = Q(X, user_fitness)
         total_levels = 0;
         for j=1:size(X)
+           %estimate fitness level required to complete an activity
            l = L(X(j,:));
+           %above allowed range
            if l > (user_fitness + 1)
                lvl_penalty = l - (user_fitness + 1);
+           %below allowed range
            elseif l < (user_fitness - 4)
                lvl_penalty = (user_fitness - 4) - l;
+           %acceptable range
            else
                lvl_penalty = 0;
            end
            total_levels = total_levels + lvl_penalty;
         end
+        %penalize based on the number of levels outside of the range
         q = heaviside(50 * total_levels);
     end
 
+    %estimate fitness level required to complete an activity
     function lvl = L(x)
         p = P(x);
         lvl = heaviside(-200/x(2) + p/5 - 9);
     end
 
+    %penalty for activity length variance
     function v = V(training_plan)
         short = 0;
         average = 0;
         long = 0;
         penalty = 0;
+        %calculate training plan activity length variance
         row = size(training_plan, 1);
         for j = 1:row
             activity = training_plan(j,:);
@@ -78,6 +98,7 @@ function fitness = training_objective(training_plan, user_fitness, user_traits)
                 long = long + 1;
             end
         end
+        %penalize based on percent outside of allowed range
         short_p = short/row;
         if (short_p >= 0.35)
             penalty = penalty + (short_p - 0.35)*7500;
@@ -99,6 +120,7 @@ function fitness = training_objective(training_plan, user_fitness, user_traits)
         v = penalty;
     end
 
+    %calculate power required to complete an activity
     %https://strava.zendesk.com/entries/20959332-Power-Calculations
     function p = P(x)
         d = x(1);
